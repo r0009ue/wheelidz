@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheely dz - Location de Vélos Électriques | USTHB</title>
+    <style>
+        :root {
+            --primary: #00b894;
+            --primary-dark: #00916f;
+            --secondary: #0984e3;
+            --accent: #fdcb6e;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --white: #ffffff;
+            --success: #00b894;
+            --warning: #fdcb6e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,184,148,0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-outline {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--primary);
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,184,148,0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s 0.2s backwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeInUp 1s 0.4s backwards;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--dark);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .price-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .price-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+
+        .price-card.featured {
+            border-color: var(--accent);
+            background: rgba(253,203,110,0.1);
+        }
+
+        .price-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .price small {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .price-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .price-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* How it Works */
+        .how-it-works {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .step h3 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        /* Booking Section */
+        .booking {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .booking-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 2rem auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .price-display {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .price-display h3 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reservation-code {
+            background: var(--success);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .reservation-code h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .code-display {
+            font-size: 3rem;
+            font-weight: bold;
+            letter-spacing: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span>🚴</span> Wheeli DZ
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home">Accueil</a></li>
+                    <li><a href="#features">Avantages</a></li>
+                    <li><a href="#pricing">Tarifs</a></li>
+                    <li><a href="#how">Comment ça marche</a></li>
+                    <li><a href="#booking">Réserver</a></li>
+                </ul>
+                <button class="btn-outline">Se connecter</button>
+                <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>🚴 Wheeli DZ - Ta Mobilité Campus</h1>
+            <p>La solution de mobilité électrique simple, rapide et abordable sur le campus de Bab Ezzouar</p>
+            <div class="hero-buttons">
+                <a href="#booking" class="btn btn-primary">Louer un vélo</a>
+                <a href="#how" class="btn btn-secondary">Comment ça marche ?</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Pourquoi choisir Wasil Easy ?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>100% Électrique</h3>
+                    <p>Des vélos électriques modernes et écologiques pour des déplacements sans effort</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Prix Abordables</h3>
+                    <p>À partir de 50 DA pour 15 minutes - moins cher qu'un taxi !</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>GPS Intégré</h3>
+                    <p>Localisation en temps réel pour votre sécurité</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Sécurisé</h3>
+                    <p>Déverrouillage par code unique et système de surveillance</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Gain de Temps</h3>
+                    <p>Plus rapide que la marche entre les départements</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌿</div>
+                    <h3>Écologique</h3>
+                    <p>Zéro émission, 100% respect de l'environnement</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <h2 class="section-title">Nos Tarifs</h2>
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h3>⚡ Express</h3>
+                    <div class="price">50 DA <small>/15min</small></div>
+                    <ul class="price-features">
+                        <li>Parfait pour trajets courts</li>
+                        <li>Déverrouillage instantané</li>
+                        <li>GPS intégré</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-secondary">Choisir</a>
+                </div>
+
+                <div class="price-card">
+                    <h3>🚀 Rapide</h3>
+                    <div class="price">90 DA <small>/30min</small></div>
+                    <ul class="price-features">
+                        <li>Idéal entre cours</li>
+                        <li>Économique</li>
+                        <li>Sans engagement</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-secondary">Choisir</a>
+                </div>
+
+                <div class="price-card featured">
+                    <h3>🌟 Standard</h3>
+                    <div class="price">150 DA <small>/1h</small></div>
+                    <ul class="price-features">
+                        <li>Le plus populaire</li>
+                        <li>Parfait pour campus</li>
+                        <li>Meilleur rapport qualité/prix</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-primary">Choisir</a>
+                </div>
+
+                <div class="price-card">
+                    <h3>📚 Étudiant</h3>
+                    <div class="price">1 200 DA <small>/mois</small></div>
+                    <ul class="price-features">
+                        <li>Usage illimité 2h/jour</li>
+                        <li>-20% trajets supplémentaires</li>
+                        <li>Réservation prioritaire</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-secondary">Choisir</a>
+                </div>
+
+                <div class="price-card">
+                    <h3>⭐ Premium</h3>
+                    <div class="price">2 500 DA <small>/mois</small></div>
+                    <ul class="price-features">
+                        <li>Usage illimité 4h/jour</li>
+                        <li>Priorité réservation</li>
+                        <li>1 recharge gratuite/semaine</li>
+                        <li>Support prioritaire</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-secondary">Choisir</a>
+                </div>
+
+                <div class="price-card">
+                    <h3>🌙 Soirée</h3>
+                    <div class="price">1 000 DA <small>/mois</small></div>
+                    <ul class="price-features">
+                        <li>Usage illimité 17h-22h</li>
+                        <li>Idéal après les cours</li>
+                        <li>Tarif avantageux</li>
+                    </ul>
+                    <a href="#booking" class="btn btn-secondary">Choisir</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how" class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Comment ça marche ?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Scanne le QR</h3>
+                    <p>Trouve un vélo disponible et scanne le QR code</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Choisis ton forfait</h3>
+                    <p>Sélectionne la durée qui te convient</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Paie en ligne</h3>
+                    <p>Carte bancaire ou Yassir acceptés</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Reçois ton code</h3>
+                    <p>Code unique à 6 chiffres généré instantanément</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Déverrouille</h3>
+                    <p>Entre le code sur le vélo pour déverrouiller</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <h3>Roule !</h3>
+                    <p>Profite de ton trajet sur le campus</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Réserve ton vélo maintenant</h2>
+            <div class="booking-form">
+                <form id="reservationForm">
+                    <div class="form-group">
+                        <label for="name">Nom complet</label>
+                        <input type="text" id="name" required placeholder="Ex: Ahmed Benali">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="ahmed.benali@usthb.dz">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Téléphone</label>
+                        <input type="tel" id="phone" required placeholder="0555 123 456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Durée de location</label>
+                        <select id="duration" required>
+                            <option value="">Choisir une durée</option>
+                            <option value="50">15 minutes - 50 DA</option>
+                            <option value="90">30 minutes - 90 DA</option>
+                            <option value="150">1 heure - 150 DA</option>
+                            <option value="270">2 heures - 270 DA</option>
+                            <option value="500">4 heures - 500 DA</option>
+                            <option value="700">6 heures - 700 DA</option>
+                            <option value="1200">12 heures - 1 200 DA</option>
+                            <option value="1500">Journée complète (14h) - 1 500 DA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="station">Station de départ</label>
+                        <select id="station" required>
+                            <option value="">Choisir une station</option>
+                            <option value="entree">Entrée principale</option>
+                            <option value="biblio">Zone centrale (Bibliothèque)</option>
+                            <option value="sciences">Faculté des Sciences</option>
+                        </select>
+                    </div>
+
+                    <div class="price-display" id="priceDisplay" style="display: none;">
+                        <h3 id="totalPrice">0 DA</h3>
+                        <p>Prix total à payer</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem;">
+                        Confirmer la réservation
+                    </button>
+                </form>
+
+                <div class="reservation-code" id="reservationCode">
+                    <h3>✅ Réservation confirmée !</h3>
+                    <p>Votre code de déverrouillage :</p>
+                    <div class="code-display" id="codeDisplay">------</div>
+                    <p>Entrez ce code sur le vélo pour déverrouiller</p>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">Un SMS de confirmation a été envoyé</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Wheeli Dz</h3>
+                    <p>Votre solution de mobilité électrique sur le campus de Bab Ezzouar</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liens rapides</h3>
+                    <ul>
+                        <li><a href="#features">Avantages</a></li>
+                        <li><a href="#pricing">Tarifs</a></li>
+                        <li><a href="#how">Guide d'utilisation</a></li>
+                        <li><a href="#booking">Réserver</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li>📧 contact@WheeliDZ.dz</li>
+                        <li>📱 +213 552 045 774</li>
+                        <li>📍 USTHB, Alger</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Horaires</h3>
+                    <ul>
+                        <li>Samedi - Jeudi: 8h - 22h</li>
+                    </ul>
+                </div>
+            </div>
+            <p>&copy; 2026 Wheeli DZ - BLEDI BIKES. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Update price display when duration changes
+        document.getElementById('duration').addEventListener('change', function() {
+            const price = this.value;
+            const priceDisplay = document.getElementById('priceDisplay');
+            const totalPrice = document.getElementById('totalPrice');
+            
+            if (price) {
+                priceDisplay.style.display = 'block';
+                totalPrice.textContent = price + ' DA';
+            } else {
+                priceDisplay.style.display = 'none';
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            
+            // Generate random 6-digit code
+            const code = Math.floor(100000 + Math.random() * 900000);
+            
+            // Show reservation code
+            document.getElementById('codeDisplay').textContent = code;
+            document.getElementById('reservationCode').style.display = 'block';
+            
+            // Scroll to code
+            document.getElementById('reservationCode').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Reset form after 10 seconds
+            setTimeout(() => {
+                if (confirm('Voulez-vous faire une nouvelle réservation ?')) {
+                    document.getElementById('reservationForm').reset();
+                    document.getElementById('reservationCode').style.display = 'none';
+                    document.getElementById('priceDisplay').style.display = 'none';
+                }
+            }, 10000);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
