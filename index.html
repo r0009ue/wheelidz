@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wheely dz - Location de Vélos Électriques | USTHB</title>
+    <title>Wheely DZ - Location de Vélos Électriques | USTHB</title>
     <style>
         :root {
             --primary: #00b894;
@@ -135,6 +135,105 @@
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,184,148,0.3);
+        }
+
+        /* Modal Login */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideDown 0.3s;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--primary);
+        }
+
+        .modal-content h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .solde-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .deposit-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Hero Section */
@@ -467,7 +566,7 @@
         <div class="container">
             <nav>
                 <div class="logo">
-                    <span>🚴</span> Wheeli DZ
+                    <span>🚴</span> Wheely DZ
                 </div>
                 <ul class="nav-links">
                     <li><a href="#home">Accueil</a></li>
@@ -476,16 +575,66 @@
                     <li><a href="#how">Comment ça marche</a></li>
                     <li><a href="#booking">Réserver</a></li>
                 </ul>
-                <button class="btn-outline">Se connecter</button>
+                <button class="btn-outline" id="loginBtn" type="button">Se connecter</button>
+                <button class="btn-outline" id="soldeBtn" type="button" style="background: white; color: var(--primary); border: 2px solid var(--primary);">💰 <span id="soldeDisplay">0 DA</span></button>
                 <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
             </nav>
         </div>
     </header>
 
+    <!-- Modal Solde -->
+    <div id="soldeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeSoldeModal">&times;</span>
+            <h2>💰 Mon Solde</h2>
+            <div class="solde-amount" id="currentSolde">0 DA</div>
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="depositAmount">Montant à déposer (DA)</label>
+                    <input type="number" id="depositAmount" class="deposit-input" required placeholder="Ex: 1000" min="100" step="50">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    💳 Déposer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2>🔐 Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required placeholder="votre.email@usthb.dz">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        <input type="checkbox" id="rememberMe">
+                        Se souvenir de moi
+                    </label>
+                    <a href="#" style="color: var(--primary); font-size: 0.9rem; text-decoration: none;">Mot de passe oublié ?</a>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                    Se connecter
+                </button>
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                    Pas encore de compte ? <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Créer un compte</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="container">
-            <h1>🚴 Wheeli DZ - Ta Mobilité Campus</h1>
+            <h1>🚴 Wheely DZ - Ta Mobilité Campus</h1>
             <p>La solution de mobilité électrique simple, rapide et abordable sur le campus de Bab Ezzouar</p>
             <div class="hero-buttons">
                 <a href="#booking" class="btn btn-primary">Louer un vélo</a>
@@ -497,7 +646,7 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">Pourquoi choisir Wasil Easy ?</h2>
+            <h2 class="section-title">Pourquoi choisir Wheely DZ ?</h2>
             <div class="feature-grid">
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
@@ -698,6 +847,8 @@
                         <p>Prix total à payer</p>
                     </div>
 
+                    <div id="alertContainer"></div>
+                    
                     <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem;">
                         Confirmer la réservation
                     </button>
@@ -719,7 +870,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Wheeli Dz</h3>
+                    <h3>Wheely DZ</h3>
                     <p>Votre solution de mobilité électrique sur le campus de Bab Ezzouar</p>
                 </div>
                 <div class="footer-section">
@@ -734,9 +885,9 @@
                 <div class="footer-section">
                     <h3>Contact</h3>
                     <ul>
-                        <li>📧 contact@WheeliDZ.dz</li>
+                        <li>📧 contact@Wheely DZ.dz</li>
                         <li>📱 +213 552 045 774</li>
-                        <li>📍 USTHB, Alger</li>
+                        <li>📍 Bab Ezzouar, Alger</li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -746,11 +897,19 @@
                     </ul>
                 </div>
             </div>
-            <p>&copy; 2026 Wheeli DZ - BLEDI BIKES. Tous droits réservés.</p>
+            <p>&copy; 2026 Wheely DZ . Tous droits réservés.</p>
         </div>
     </footer>
 
     <script>
+        // Solde management
+        let currentSolde = 0;
+
+        function updateSoldeDisplay() {
+            document.getElementById('soldeDisplay').textContent = currentSolde + ' DA';
+            document.getElementById('currentSolde').textContent = currentSolde + ' DA';
+        }
+
         // Update price display when duration changes
         document.getElementById('duration').addEventListener('change', function() {
             const price = this.value;
@@ -771,9 +930,30 @@
             
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
+            const price = parseInt(document.getElementById('duration').value);
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Check if price is selected
+            if (!price) {
+                alertContainer.innerHTML = '<div class="alert alert-warning">⚠️ Veuillez sélectionner une durée de location</div>';
+                return;
+            }
+            
+            // Check if solde is sufficient
+            if (currentSolde < price) {
+                alertContainer.innerHTML = '<div class="alert alert-warning">⚠️ Solde insuffisant ! Votre solde : ' + currentSolde + ' DA. Prix : ' + price + ' DA. <br><br><button class="btn btn-primary" onclick="document.getElementById(\'soldeModal\').style.display = \'block\'">💰 Recharger mon solde</button></div>';
+                return;
+            }
+            
+            // Deduct from solde
+            currentSolde -= price;
+            updateSoldeDisplay();
             
             // Generate random 6-digit code
             const code = Math.floor(100000 + Math.random() * 900000);
+            
+            // Show success message
+            alertContainer.innerHTML = '<div class="alert alert-success">✅ Paiement réussi ! ' + price + ' DA déduits. Nouveau solde : ' + currentSolde + ' DA</div>';
             
             // Show reservation code
             document.getElementById('codeDisplay').textContent = code;
@@ -800,6 +980,74 @@
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
+            });
+        });
+
+        // Modal Login functionality - FIX
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginModal = document.getElementById('loginModal');
+            const loginBtn = document.getElementById('loginBtn');
+            const closeModal = document.getElementById('closeModal');
+            
+            const soldeModal = document.getElementById('soldeModal');
+            const soldeBtn = document.getElementById('soldeBtn');
+            const closeSoldeModal = document.getElementById('closeSoldeModal');
+
+            // Initialize solde display
+            updateSoldeDisplay();
+
+            // Open solde modal
+            soldeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                soldeModal.style.display = 'block';
+            });
+
+            // Close solde modal
+            closeSoldeModal.addEventListener('click', function() {
+                soldeModal.style.display = 'none';
+            });
+
+            // Handle deposit
+            document.getElementById('depositForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const amount = parseInt(document.getElementById('depositAmount').value);
+                currentSolde += amount;
+                updateSoldeDisplay();
+                alert('✅ Dépôt réussi ! ' + amount + ' DA ajoutés. Nouveau solde : ' + currentSolde + ' DA');
+                soldeModal.style.display = 'none';
+                document.getElementById('depositForm').reset();
+            });
+
+            // Open modal when clicking login button
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Bouton Se connecter cliqué');
+                loginModal.style.display = 'block';
+            });
+
+            // Close modal when clicking X
+            closeModal.addEventListener('click', function() {
+                loginModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+                if (e.target === soldeModal) {
+                    soldeModal.style.display = 'none';
+                }
+            });
+
+            // Handle login form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                alert('Connexion en cours pour : ' + email);
+                loginModal.style.display = 'none';
             });
         });
     </script>
