@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wheely DZ - Location de Vélos Électriques | USTHB</title>
+    <title>Wheely DZ - Location de Vélos Électriques | Campus Bab Ezzouar</title>
     <style>
         :root {
             --primary: #00b894;
@@ -137,7 +137,7 @@
             box-shadow: 0 5px 15px rgba(0,184,148,0.3);
         }
 
-        /* Modal Login */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -577,6 +577,7 @@
                 </ul>
                 <button class="btn-outline" id="loginBtn" type="button">Se connecter</button>
                 <button class="btn-outline" id="soldeBtn" type="button" style="background: white; color: var(--primary); border: 2px solid var(--primary);">💰 <span id="soldeDisplay">0 DA</span></button>
+                <button class="btn-outline" id="unlockBtn" type="button">🔓 Déverrouiller</button>
                 <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
             </nav>
         </div>
@@ -595,6 +596,24 @@
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     💳 Déposer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Unlock -->
+    <div id="unlockModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeUnlockModal">&times;</span>
+            <h2>🔓 Déverrouillez votre vélo</h2>
+            <form id="unlockForm">
+                <div class="form-group">
+                    <label for="unlockCode">Entrez votre code de 6 chiffres</label>
+                    <input type="text" id="unlockCode" required placeholder="Ex: 123456" maxlength="6" pattern="[0-9]{6}">
+                </div>
+                <div id="unlockAlert"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Déverrouiller mon vélo
                 </button>
             </form>
         </div>
@@ -885,9 +904,9 @@
                 <div class="footer-section">
                     <h3>Contact</h3>
                     <ul>
-                        <li>📧 contact@Wheely DZ.dz</li>
+                        <li>📧 contact@wheelydz.dz</li>
                         <li>📱 +213 552 045 774</li>
-                        <li>📍 Bab Ezzouar, Alger</li>
+                        <li>📍 Campus Bab Ezzouar, Alger</li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -897,13 +916,16 @@
                     </ul>
                 </div>
             </div>
-            <p>&copy; 2026 Wheely DZ . Tous droits réservés.</p>
+            <p>&copy; 2026 Wheely DZ. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script>
         // Solde management
         let currentSolde = 0;
+
+        // Dernier code de réservation généré
+        let lastGeneratedCode = null;
 
         function updateSoldeDisplay() {
             document.getElementById('soldeDisplay').textContent = currentSolde + ' DA';
@@ -951,6 +973,7 @@
             
             // Generate random 6-digit code
             const code = Math.floor(100000 + Math.random() * 900000);
+            lastGeneratedCode = code;
             
             // Show success message
             alertContainer.innerHTML = '<div class="alert alert-success">✅ Paiement réussi ! ' + price + ' DA déduits. Nouveau solde : ' + currentSolde + ' DA</div>';
@@ -968,6 +991,7 @@
                     document.getElementById('reservationForm').reset();
                     document.getElementById('reservationCode').style.display = 'none';
                     document.getElementById('priceDisplay').style.display = 'none';
+                    alertContainer.innerHTML = '';
                 }
             }, 10000);
         });
@@ -983,7 +1007,7 @@
             });
         });
 
-        // Modal Login functionality - FIX
+        // Modal functionality
         document.addEventListener('DOMContentLoaded', function() {
             const loginModal = document.getElementById('loginModal');
             const loginBtn = document.getElementById('loginBtn');
@@ -992,6 +1016,10 @@
             const soldeModal = document.getElementById('soldeModal');
             const soldeBtn = document.getElementById('soldeBtn');
             const closeSoldeModal = document.getElementById('closeSoldeModal');
+            
+            const unlockModal = document.getElementById('unlockModal');
+            const unlockBtn = document.getElementById('unlockBtn');
+            const closeUnlockModal = document.getElementById('closeUnlockModal');
 
             // Initialize solde display
             updateSoldeDisplay();
@@ -1019,17 +1047,30 @@
                 document.getElementById('depositForm').reset();
             });
 
-            // Open modal when clicking login button
+            // Open login modal
             loginBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Bouton Se connecter cliqué');
                 loginModal.style.display = 'block';
             });
 
-            // Close modal when clicking X
+            // Close login modal
             closeModal.addEventListener('click', function() {
                 loginModal.style.display = 'none';
+            });
+
+            // Open unlock modal
+            unlockBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                document.getElementById('unlockAlert').innerHTML = '';
+                document.getElementById('unlockForm').reset();
+                unlockModal.style.display = 'block';
+            });
+
+            // Close unlock modal
+            closeUnlockModal.addEventListener('click', function() {
+                unlockModal.style.display = 'none';
             });
 
             // Close modal when clicking outside
@@ -1040,6 +1081,9 @@
                 if (e.target === soldeModal) {
                     soldeModal.style.display = 'none';
                 }
+                if (e.target === unlockModal) {
+                    unlockModal.style.display = 'none';
+                }
             });
 
             // Handle login form submission
@@ -1048,6 +1092,35 @@
                 const email = document.getElementById('loginEmail').value;
                 alert('Connexion en cours pour : ' + email);
                 loginModal.style.display = 'none';
+            });
+
+            // Handle unlock form submission
+            document.getElementById('unlockForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const enteredCode = document.getElementById('unlockCode').value.trim();
+                const unlockAlert = document.getElementById('unlockAlert');
+
+                if (!lastGeneratedCode) {
+                    unlockAlert.innerHTML = '<div class="alert alert-warning">⚠️ Aucun code de réservation trouvé. Veuillez d\'abord réserver un vélo.</div>';
+                    return;
+                }
+
+                if (enteredCode.length !== 6) {
+                    unlockAlert.innerHTML = '<div class="alert alert-warning">⚠️ Le code doit contenir 6 chiffres.</div>';
+                    return;
+                }
+
+                if (enteredCode === String(lastGeneratedCode)) {
+                    unlockAlert.innerHTML = '<div class="alert alert-success">✅ Votre vélo est déverrouillé. Bonne journée ! 🚴</div>';
+                    setTimeout(() => {
+                        unlockModal.style.display = 'none';
+                        document.getElementById('unlockForm').reset();
+                        unlockAlert.innerHTML = '';
+                    }, 3000);
+                } else {
+                    unlockAlert.innerHTML = '<div class="alert alert-warning">❌ Code incorrect. Veuillez vérifier le code affiché lors de votre réservation.</div>';
+                }
             });
         });
     </script>
