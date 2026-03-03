@@ -608,7 +608,11 @@
             </div>
         </div>
                 <button class="btn-outline" id="soldeBtn" type="button" style="background: white; color: var(--primary); border: 2px solid var(--primary);">💰 <span id="soldeDisplay">0 DA</span></button>
-                <button class="btn-outline" id="unlockBtn" type="button">🔓 Déverrouiller</button>
+                <button class="btn-outline" id="unlockBtn" type="button">🔓 Déver</button>
+                <div id="rideStatus" style="display:none; margin-left:15px; font-weight:bold; color:#00b894;">
+                    🚴 Location en cours :
+                    <span id="rideTimer">00:00</span>
+                </div>
                 <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
             </nav>
         </div>
@@ -998,6 +1002,9 @@
     const unlockBtn = document.getElementById("unlockBtn");
     const unlockModal = document.getElementById("unlockModal");
     const closeUnlockModal = document.getElementById("closeUnlockModal");
+
+        let rideInterval = null;
+        let rideStartTime = null;
     
     // ================= USER =================
     function loadUser() {
@@ -1093,10 +1100,31 @@
         const data = await response.json();
     
         if (response.ok) {
-            currentSolde = data.solde;
-            updateSoldeDisplay();
-        }
-    }
+
+    alert(data.message);
+    unlockModal.style.display = "none";
+    unlockForm.reset();
+
+    // Démarrer la location
+    rideStartTime = Date.now();
+
+    const rideStatus = document.getElementById("rideStatus");
+    const rideTimer = document.getElementById("rideTimer");
+
+    rideStatus.style.display = "inline-block";
+
+    rideInterval = setInterval(() => {
+        const elapsed = Date.now() - rideStartTime;
+
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+
+        rideTimer.textContent =
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(seconds).padStart(2, "0");
+    }, 1000);
+}
     
     soldeBtn.addEventListener("click", () => soldeModal.style.display = "block");
     closeSoldeModal.addEventListener("click", () => soldeModal.style.display = "none");
