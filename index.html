@@ -1034,38 +1034,40 @@
     
     /* ================= LOGIN ================= */
     
-    loginBtn.addEventListener("click", () => {
-        loginModal.style.display = "block";
-    });
-    
-    closeModal.addEventListener("click", () => {
-        loginModal.style.display = "none";
-    });
-    
     authForm.addEventListener("submit", async function (e) {
-    
-        e.preventDefault();
-    
-        const email = document.getElementById("authEmail").value;
-        const password = document.getElementById("authPassword").value;
-    
+    e.preventDefault();
+
+    const email = document.getElementById("authEmail").value;
+    const password = document.getElementById("authPassword").value;
+
+    try {
         const response = await fetch(API + "/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
         });
-    
+
         const data = await response.json();
-    
-        if (response.ok) {
-            localStorage.setItem("token", data.token);
-            loginModal.style.display = "none";
-            refreshProfile();
-            alert("Connecté ✅");
-        } else {
+
+        if (!response.ok) {
             alert(data.error);
+            return;
         }
-    });
+
+        // 🔥 IMPORTANT
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        loginModal.style.display = "none";
+        loadUser();
+        refreshSolde();
+
+        alert("Connexion réussie ✅");
+
+    } catch (error) {
+        alert("Erreur serveur");
+    }
+});
     
     /* ================= DEPOSIT ================= */
     
@@ -1131,44 +1133,42 @@
     
     /* ================= UNLOCK ================= */
     
-    unlockBtn.addEventListener("click", () => {
-        unlockModal.style.display = "block";
-    });
-    
-    closeUnlockModal.addEventListener("click", () => {
-        unlockModal.style.display = "none";
-    });
-    
-    unlockForm.addEventListener("submit", async function (e) {
-    
-        e.preventDefault();
-    
-        const token = localStorage.getItem("token");
-        const code = document.getElementById("unlockCode").value;
-    
-        const response = await fetch(API + "/unlock", {
+    authForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("authEmail").value;
+    const password = document.getElementById("authPassword").value;
+
+    try {
+        const response = await fetch(API + "/login", {
             method: "POST",
-            headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ code })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
         });
-    
+
         const data = await response.json();
-    
-        if (response.ok) {
-    
-            localStorage.setItem("rideStartTime", Date.now());
-            startTimer();
-    
-            unlockModal.style.display = "none";
-            alert("Vélo déverrouillé 🚴");
-    
-        } else {
+
+        if (!response.ok) {
             alert(data.error);
+            return;
         }
-    });
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // 🔥 Met à jour le bouton
+        loginBtn.textContent = "Bonjour " + data.user.nom + " 👋";
+
+        loginModal.style.display = "none";
+
+        refreshProfile();
+
+        alert("Connexion réussie ✅");
+
+    } catch (error) {
+        alert("Erreur serveur");
+    }
+});
     
     /* ================= TIMER ================= */
     
@@ -1228,6 +1228,11 @@
     /* ================= INIT ================= */
     
     refreshProfile();
+        const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+                const parsed = JSON.parse(storedUser);
+                loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
+            }
     
     if (localStorage.getItem("rideStartTime")) {
         startTimer();
