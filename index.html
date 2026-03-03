@@ -1220,6 +1220,25 @@
                 alert("Erreur serveur");
             }
         });
+        // ================= OPEN UNLOCK MODAL =================
+        const unlockBtn = document.getElementById("unlockBtn");
+        const unlockModal = document.getElementById("unlockModal");
+        const closeUnlockModal = document.getElementById("closeUnlockModal");
+        
+        unlockBtn.addEventListener("click", function () {
+            unlockModal.style.display = "block";
+        });
+        
+        closeUnlockModal.addEventListener("click", function () {
+            unlockModal.style.display = "none";
+        });
+        
+        // Fermer si clique en dehors
+        window.addEventListener("click", function (e) {
+            if (e.target === unlockModal) {
+                unlockModal.style.display = "none";
+            }
+        });
     
         // ================= INIT =================
     
