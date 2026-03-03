@@ -619,36 +619,41 @@
         </div>
     </div>
 
-    <!-- Modal Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" id="closeModal">&times;</span>
-            <h2>🔐 Connexion</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required placeholder="votre.email@usthb.dz">
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Mot de passe</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
-                        <input type="checkbox" id="rememberMe">
-                        Se souvenir de moi
-                    </label>
-                    <a href="#" style="color: var(--primary); font-size: 0.9rem; text-decoration: none;">Mot de passe oublié ?</a>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
-                    Se connecter
-                </button>
-                <p style="text-align: center; color: #666; font-size: 0.9rem;">
-                    Pas encore de compte ? <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Créer un compte</a>
-                </p>
-            </form>
-        </div>
+<!-- Modal Login -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <h2>🔐 Connexion</h2>
+
+        <form id="authForm">
+            <div id="nameField" class="form-group" style="display:none;">
+                <label>Nom complet</label>
+                <input type="text" id="authName" placeholder="Ahmed Benali">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="authEmail" required placeholder="votre.email@usthb.dz">
+            </div>
+
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" id="authPassword" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                <span id="authButtonText">Se connecter</span>
+            </button>
+
+            <p style="text-align: center; font-size: 0.9rem;">
+                <a href="#" id="toggleAuth" style="color: var(--primary); font-weight: 600;">
+                    Créer un compte
+                </a>
+            </p>
+        </form>
+
     </div>
+</div>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
@@ -1087,12 +1092,69 @@
             });
 
             // Handle login form submission
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                alert('Connexion en cours pour : ' + email);
-                loginModal.style.display = 'none';
-            });
+           let isLoginMode = true;
+
+const authForm = document.getElementById("authForm");
+const toggleAuth = document.getElementById("toggleAuth");
+const nameField = document.getElementById("nameField");
+const authButtonText = document.getElementById("authButtonText");
+
+toggleAuth.addEventListener("click", function(e) {
+    e.preventDefault();
+    isLoginMode = !isLoginMode;
+
+    if (isLoginMode) {
+        nameField.style.display = "none";
+        authButtonText.textContent = "Se connecter";
+        toggleAuth.textContent = "Créer un compte";
+    } else {
+        nameField.style.display = "block";
+        authButtonText.textContent = "Créer un compte";
+        toggleAuth.textContent = "Déjà un compte ?";
+    }
+});
+
+authForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("authEmail").value;
+    const password = document.getElementById("authPassword").value;
+    const nom = document.getElementById("authName").value;
+
+    const url = isLoginMode 
+        ? "https://wheely-dz-server.onrender.com/login"
+        : "https://wheely-dz-server.onrender.com/register";
+
+    const body = isLoginMode 
+        ? { email, password }
+        : { nom, email, password };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem("token", data.token || "");
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            alert(isLoginMode ? "Connexion réussie ✅" : "Compte créé ✅");
+
+            document.getElementById("loginModal").style.display = "none";
+
+            loadUserProfile();
+        } else {
+            alert(data.error);
+        }
+
+    } catch (error) {
+        alert("Erreur serveur");
+    }
+});
 
             // Handle unlock form submission
             document.getElementById('unlockForm').addEventListener('submit', function(e) {
