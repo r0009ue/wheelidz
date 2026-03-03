@@ -977,241 +977,357 @@
     <script>
     document.addEventListener("DOMContentLoaded", function () {
     
-        const API = "https://wheely-dz-server.onrender.com";
+    const API = "https://wheely-dz-server.onrender.com";
     
-        let currentSolde = 0;
-        let rideInterval = null;
+    let currentSolde = 0;
+    let rideInterval = null;
+    let isLoginMode = true;
     
-        // ================= ELEMENTS =================
-        const loginBtn = document.getElementById("loginBtn");
-        const loginModal = document.getElementById("loginModal");
-        const closeModal = document.getElementById("closeModal");
+    /* ================= ELEMENTS ================= */
     
-        const authForm = document.getElementById("authForm");
-        const toggleAuth = document.getElementById("toggleAuth");
-        const nameField = document.getElementById("nameField");
-        const authButtonText = document.getElementById("authButtonText");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginModal = document.getElementById("loginModal");
+    const closeModal = document.getElementById("closeModal");
     
-        const dropdownMenu = document.getElementById("dropdownMenu");
-        const logoutBtn = document.getElementById("logoutBtn");
+    const authForm = document.getElementById("authForm");
+    const toggleAuth = document.getElementById("toggleAuth");
+    const nameField = document.getElementById("nameField");
+    const authButtonText = document.getElementById("authButtonText");
     
-        const soldeModal = document.getElementById("soldeModal");
-        const soldeBtn = document.getElementById("soldeBtn");
-        const closeSoldeModal = document.getElementById("closeSoldeModal");
-        const depositForm = document.getElementById("depositForm");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const profileBtn = document.getElementById("profileBtn");
     
-        const reservationForm = document.getElementById("reservationForm");
+    const soldeModal = document.getElementById("soldeModal");
+    const soldeBtn = document.getElementById("soldeBtn");
+    const closeSoldeModal = document.getElementById("closeSoldeModal");
+    const depositForm = document.getElementById("depositForm");
     
-        const unlockForm = document.getElementById("unlockForm");
-        const unlockBtn = document.getElementById("unlockBtn");
-        const unlockModal = document.getElementById("unlockModal");
-        const closeUnlockModal = document.getElementById("closeUnlockModal");
+    const reservationForm = document.getElementById("reservationForm");
     
-        const rideStatus = document.getElementById("rideStatus");
-        const rideTimer = document.getElementById("rideTimer");
-        const endRideBtn = document.getElementById("endRideBtn");
+    const unlockForm = document.getElementById("unlockForm");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const unlockModal = document.getElementById("unlockModal");
+    const closeUnlockModal = document.getElementById("closeUnlockModal");
     
-        // ================= TIMER =================
-        function startRideTimer() {
+    const historyModal = document.getElementById("historyModal");
+    const closeHistoryModal = document.getElementById("closeHistoryModal");
+    const historyContent = document.getElementById("historyContent");
     
-            rideStatus.style.display = "inline-block";
-            endRideBtn.style.display = "inline-block";
+    const rideStatus = document.getElementById("rideStatus");
+    const rideTimer = document.getElementById("rideTimer");
+    const endRideBtn = document.getElementById("endRideBtn");
     
-            if (rideInterval) clearInterval(rideInterval);
+    /* ================= TIMER ================= */
     
-            rideInterval = setInterval(() => {
+    function startRideTimer() {
     
-                const start = parseInt(localStorage.getItem("rideStartTime"));
-                if (!start) return;
+        rideStatus.style.display = "inline-block";
+        endRideBtn.style.display = "inline-block";
     
-                const elapsed = Date.now() - start;
+        if (rideInterval) clearInterval(rideInterval);
     
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
+        rideInterval = setInterval(() => {
     
-                rideTimer.textContent =
-                    String(minutes).padStart(2, "0") +
-                    ":" +
-                    String(seconds).padStart(2, "0");
+            const start = parseInt(localStorage.getItem("rideStartTime"));
+            if (!start) return;
     
-            }, 1000);
+            const elapsed = Date.now() - start;
+    
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+    
+            rideTimer.textContent =
+                String(minutes).padStart(2, "0") +
+                ":" +
+                String(seconds).padStart(2, "0");
+    
+        }, 1000);
+    }
+    
+    /* ================= USER ================= */
+    
+    function loadUser() {
+        const user = localStorage.getItem("user");
+    
+        if (user) {
+            loginBtn.textContent = "Bonjour " + JSON.parse(user).nom + " 👋";
+        } else {
+            loginBtn.textContent = "Se connecter";
         }
+    }
     
-        // ================= USER =================
-        function loadUser() {
-            const user = localStorage.getItem("user");
-            loginBtn.textContent = user
-                ? "Bonjour " + JSON.parse(user).nom + " 👋"
-                : "Se connecter";
+    function logout() {
+        localStorage.clear();
+        dropdownMenu.style.display = "none";
+        rideStatus.style.display = "none";
+        endRideBtn.style.display = "none";
+        clearInterval(rideInterval);
+        loadUser();
+    }
+    
+    logoutBtn.addEventListener("click", logout);
+    
+    /* ================= LOGIN / REGISTER ================= */
+    
+    loginBtn.addEventListener("click", function () {
+    
+        const user = localStorage.getItem("user");
+    
+        if (!user) {
+            loginModal.style.display = "block";
+        } else {
+            dropdownMenu.style.display =
+                dropdownMenu.style.display === "block" ? "none" : "block";
         }
+    });
     
-        function logout() {
-            localStorage.clear();
+    closeModal.addEventListener("click", () => loginModal.style.display = "none");
+    
+    toggleAuth.addEventListener("click", function (e) {
+        e.preventDefault();
+    
+        isLoginMode = !isLoginMode;
+    
+        nameField.style.display = isLoginMode ? "none" : "block";
+        authButtonText.textContent = isLoginMode ? "Se connecter" : "Créer un compte";
+        toggleAuth.textContent = isLoginMode ? "Créer un compte" : "Déjà un compte ?";
+    });
+    
+    authForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const email = document.getElementById("authEmail").value;
+        const password = document.getElementById("authPassword").value;
+        const nom = document.getElementById("authName").value;
+    
+        const url = isLoginMode ? "/login" : "/register";
+        const body = isLoginMode
+            ? { email, password }
+            : { nom, email, password };
+    
+        const response = await fetch(API + url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+            if (data.token) localStorage.setItem("token", data.token);
+            if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+    
+            loginModal.style.display = "none";
+            loadUser();
+            refreshSolde();
+            alert("Connexion réussie ✅");
+        } else {
+            alert(data.error);
+        }
+    });
+    
+    /* ================= SOLDE ================= */
+    
+    function updateSoldeDisplay() {
+        document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
+        document.getElementById("currentSolde").textContent = currentSolde + " DA";
+    }
+    
+    async function refreshSolde() {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+    
+        const response = await fetch(API + "/profile", {
+            headers: { Authorization: "Bearer " + token }
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+            currentSolde = data.solde;
+            updateSoldeDisplay();
+        }
+    }
+    
+    soldeBtn.addEventListener("click", () => soldeModal.style.display = "block");
+    closeSoldeModal.addEventListener("click", () => soldeModal.style.display = "none");
+    
+    depositForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const token = localStorage.getItem("token");
+        const amount = parseInt(document.getElementById("depositAmount").value);
+    
+        const response = await fetch(API + "/deposit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({ amount })
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+            currentSolde = data.newSolde;
+            updateSoldeDisplay();
+            soldeModal.style.display = "none";
+            depositForm.reset();
+            alert(data.message);
+        } else {
+            alert(data.error);
+        }
+    });
+    
+    /* ================= RESERVATION ================= */
+    
+    reservationForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const token = localStorage.getItem("token");
+        if (!token) return alert("Connecte-toi d'abord");
+    
+        const montant = parseInt(document.getElementById("duration").value);
+    
+        const response = await fetch(API + "/reserve", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({ montant })
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+            document.getElementById("codeDisplay").textContent = data.code;
+            document.getElementById("reservationCode").style.display = "block";
+            refreshSolde();
+        } else {
+            alert(data.error);
+        }
+    });
+    
+    /* ================= UNLOCK ================= */
+    
+    unlockBtn.addEventListener("click", () => unlockModal.style.display = "block");
+    closeUnlockModal.addEventListener("click", () => unlockModal.style.display = "none");
+    
+    unlockForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const token = localStorage.getItem("token");
+        const code = document.getElementById("unlockCode").value;
+    
+        const response = await fetch(API + "/unlock", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({ code })
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+    
+            localStorage.setItem("rideStartTime", Date.now());
+            startRideTimer();
+    
+            unlockModal.style.display = "none";
+            unlockForm.reset();
+        } else {
+            alert(data.error);
+        }
+    });
+    
+    /* ================= END RIDE ================= */
+    
+    endRideBtn.addEventListener("click", async function () {
+    
+        const token = localStorage.getItem("token");
+    
+        const response = await fetch(API + "/end-ride", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token }
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+    
+            clearInterval(rideInterval);
+            localStorage.removeItem("rideStartTime");
+    
             rideStatus.style.display = "none";
             endRideBtn.style.display = "none";
-            clearInterval(rideInterval);
-            loadUser();
+    
+            alert("Durée réelle : " + data.duration + " minutes 🚴");
+        } else {
+            alert(data.error);
         }
-    
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", logout);
-        }
-    
-        // ================= SOLDE =================
-        function updateSoldeDisplay() {
-            document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
-            document.getElementById("currentSolde").textContent = currentSolde + " DA";
-        }
-    
-        async function refreshSolde() {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-    
-            const response = await fetch(API + "/profile", {
-                headers: { Authorization: "Bearer " + token }
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                currentSolde = data.solde;
-                updateSoldeDisplay();
-            }
-        }
-    
-        // ================= RESERVE =================
-        reservationForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-    
-            const token = localStorage.getItem("token");
-            if (!token) return alert("Connecte-toi d'abord");
-    
-            const montant = parseInt(document.getElementById("duration").value);
-    
-            const response = await fetch(API + "/reserve", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + token
-                },
-                body: JSON.stringify({ montant })
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                document.getElementById("codeDisplay").textContent = data.code;
-                document.getElementById("reservationCode").style.display = "block";
-                refreshSolde();
-            } else {
-                alert(data.error);
-            }
-        });
-    
-        // ================= UNLOCK =================
-        unlockForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-    
-            const token = localStorage.getItem("token");
-            if (!token) return alert("Connecte-toi d'abord");
-    
-            const code = document.getElementById("unlockCode").value;
-    
-            const response = await fetch(API + "/unlock", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + token
-                },
-                body: JSON.stringify({ code })
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-    
-                const now = Date.now();
-                localStorage.setItem("rideStartTime", now);
-    
-                startRideTimer();
-    
-                unlockModal.style.display = "none";
-                unlockForm.reset();
-    
-            } else {
-                alert(data.error);
-            }
-        });
-    
-        // ================= END RIDE =================
-        if (endRideBtn) {
-            endRideBtn.addEventListener("click", async function () {
-    
-                const token = localStorage.getItem("token");
-    
-                const response = await fetch(API + "/end-ride", {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token }
-                });
-    
-                const data = await response.json();
-    
-                if (response.ok) {
-    
-                    clearInterval(rideInterval);
-                    localStorage.removeItem("rideStartTime");
-    
-                    rideStatus.style.display = "none";
-                    endRideBtn.style.display = "none";
-    
-                    alert("Durée réelle : " + data.duration + " minutes 🚴");
-    
-                } else {
-                    alert(data.error);
-                }
-            });
-        }
-        loginBtn.addEventListener("click", function () {
-            const user = localStorage.getItem("user");
-        
-            if (!user) {
-                loginModal.style.display = "block";
-            } else {
-                dropdownMenu.style.display =
-                    dropdownMenu.style.display === "block" ? "none" : "block";
-            }
-        });
-        
-        closeModal.addEventListener("click", function () {
-            loginModal.style.display = "none";
-        });
-        soldeBtn.addEventListener("click", function () {
-        soldeModal.style.display = "block";
     });
     
-    closeSoldeModal.addEventListener("click", function () {
-        soldeModal.style.display = "none";
-    });
-           unlockBtn.addEventListener("click", function () {
-        unlockModal.style.display = "block";
+    /* ================= HISTORIQUE ================= */
+    
+    profileBtn.addEventListener("click", async function () {
+    
+        const token = localStorage.getItem("token");
+        if (!token) return alert("Connecte-toi d'abord");
+    
+        historyModal.style.display = "block";
+    
+        const response = await fetch(API + "/my-reservations", {
+            headers: { Authorization: "Bearer " + token }
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+    
+            if (data.length === 0) {
+                historyContent.innerHTML = "<p>Aucune réservation trouvée.</p>";
+                return;
+            }
+    
+            historyContent.innerHTML = data.map(res => `
+                <div style="padding:10px; border-bottom:1px solid #eee;">
+                    <strong>Code:</strong> ${res.code}<br>
+                    <strong>Montant:</strong> ${res.montant} DA<br>
+                    <strong>Statut:</strong>
+                    <span style="color:${res.used ? 'green' : 'orange'};">
+                        ${res.used ? "Utilisé ✅" : "Non utilisé ⏳"}
+                    </span><br>
+                    <strong>Date:</strong> ${new Date(res.created_at).toLocaleString()}
+                </div>
+            `).join("");
+        }
     });
     
-    closeUnlockModal.addEventListener("click", function () {
-        unlockModal.style.display = "none";
-    }); 
-            window.addEventListener("click", function (e) {
+    closeHistoryModal.addEventListener("click", () => historyModal.style.display = "none");
+    
+    /* ================= CLOSE MODALS ================= */
+    
+    window.addEventListener("click", function (e) {
+    
         if (e.target === loginModal) loginModal.style.display = "none";
         if (e.target === soldeModal) soldeModal.style.display = "none";
         if (e.target === unlockModal) unlockModal.style.display = "none";
+        if (e.target === historyModal) historyModal.style.display = "none";
     });
     
-        // ================= INIT =================
-        loadUser();
-        refreshSolde();
+    /* ================= INIT ================= */
     
-        if (localStorage.getItem("rideStartTime")) {
-            startRideTimer();
-        }
+    loadUser();
+    refreshSolde();
+    
+    if (localStorage.getItem("rideStartTime")) {
+        startRideTimer();
+    }
     
     });
     </script>
