@@ -1131,44 +1131,6 @@
         }
     });
     
-    /* ================= UNLOCK ================= */
-    
-    authForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const email = document.getElementById("authEmail").value;
-    const password = document.getElementById("authPassword").value;
-
-    try {
-        const response = await fetch(API + "/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            alert(data.error);
-            return;
-        }
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        // 🔥 Met à jour le bouton
-        loginBtn.textContent = "Bonjour " + data.user.nom + " 👋";
-
-        loginModal.style.display = "none";
-
-        refreshProfile();
-
-        alert("Connexion réussie ✅");
-
-    } catch (error) {
-        alert("Erreur serveur");
-    }
-});
     
     /* ================= TIMER ================= */
     
