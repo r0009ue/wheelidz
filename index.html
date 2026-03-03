@@ -978,7 +978,6 @@
     document.addEventListener("DOMContentLoaded", function () {
     
     const API = "https://wheely-dz-server.onrender.com";
-    
     let rideInterval = null;
     
     /* ================= ELEMENTS ================= */
@@ -986,18 +985,23 @@
     const loginBtn = document.getElementById("loginBtn");
     const loginModal = document.getElementById("loginModal");
     const closeModal = document.getElementById("closeModal");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const profileBtn = document.getElementById("profileBtn");
+    const menuSoldeBtn = document.getElementById("menuSoldeBtn");
     
     const authForm = document.getElementById("authForm");
     
     const soldeDisplay = document.getElementById("soldeDisplay");
     const currentSoldeEl = document.getElementById("currentSolde");
-    
     const soldeModal = document.getElementById("soldeModal");
     const soldeBtn = document.getElementById("soldeBtn");
     const closeSoldeModal = document.getElementById("closeSoldeModal");
     const depositForm = document.getElementById("depositForm");
     
     const reservationForm = document.getElementById("reservationForm");
+    const reservationCode = document.getElementById("reservationCode");
+    const codeDisplay = document.getElementById("codeDisplay");
     
     const unlockBtn = document.getElementById("unlockBtn");
     const unlockModal = document.getElementById("unlockModal");
@@ -1007,63 +1011,83 @@
     const rideStatus = document.getElementById("rideStatus");
     const rideTimer = document.getElementById("rideTimer");
     const endRideBtn = document.getElementById("endRideBtn");
-
-        /* ================= DROPDOWN MENU ================= */
-
-const dropdownMenu = document.getElementById("dropdownMenu");
-const logoutBtn = document.getElementById("logoutBtn");
-const profileBtn = document.getElementById("profileBtn");
-const menuSoldeBtn = document.getElementById("menuSoldeBtn");
-
-/* Ouvrir / Fermer menu quand on clique sur Bonjour */
-loginBtn.addEventListener("click", function () {
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        loginModal.style.display = "block";
-        return;
+    
+    /* ================= UI UPDATE ================= */
+    
+    function updateUI() {
+        const storedUser = localStorage.getItem("user");
+    
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
+        } else {
+            loginBtn.textContent = "Se connecter";
+        }
     }
-
-    dropdownMenu.style.display =
-        dropdownMenu.style.display === "block"
-            ? "none"
-            : "block";
-});
-
-/* Fermer si clique ailleurs */
-window.addEventListener("click", function (e) {
-    if (!e.target.closest("#loginBtn") &&
-        !e.target.closest("#dropdownMenu")) {
+    
+    /* ================= LOGIN MODAL ================= */
+    
+    loginBtn.addEventListener("click", function () {
+        const token = localStorage.getItem("token");
+    
+        if (!token) {
+            loginModal.style.display = "block";
+            return;
+        }
+    
+        dropdownMenu.style.display =
+            dropdownMenu.style.display === "block"
+                ? "none"
+                : "block";
+    });
+    
+    closeModal.onclick = () => loginModal.style.display = "none";
+    
+    window.addEventListener("click", function (e) {
+        if (!e.target.closest("#loginBtn") &&
+            !e.target.closest("#dropdownMenu")) {
+            dropdownMenu.style.display = "none";
+        }
+    });
+    
+    /* ================= LOGIN ================= */
+    
+    authForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const email = document.getElementById("authEmail").value;
+        const password = document.getElementById("authPassword").value;
+    
+        const response = await fetch(API + "/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+            alert(data.error);
+            return;
+        }
+    
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+    
+        loginModal.style.display = "none";
+        updateUI();
+        refreshProfile();
+    
+        alert("Connexion réussie ✅");
+    });
+    
+    /* ================= LOGOUT ================= */
+    
+    logoutBtn.addEventListener("click", function () {
+        localStorage.clear();
+        updateUI();
         dropdownMenu.style.display = "none";
-    }
-});
-
-/* Ouvrir profil */
-profileBtn.addEventListener("click", function () {
-    document.getElementById("historyModal").style.display = "block";
-    dropdownMenu.style.display = "none";
-});
-
-/* Ouvrir solde depuis menu */
-menuSoldeBtn.addEventListener("click", function () {
-    soldeModal.style.display = "block";
-    dropdownMenu.style.display = "none";
-});
-
-/* Déconnexion */
-logoutBtn.addEventListener("click", function () {
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("rideStartTime");
-
-    loginBtn.textContent = "Se connecter";
-
-    dropdownMenu.style.display = "none";
-
-    alert("Déconnecté ✅");
-});
+    });
     
     /* ================= PROFILE ================= */
     
@@ -1076,65 +1100,18 @@ logoutBtn.addEventListener("click", function () {
             headers: { Authorization: "Bearer " + token }
         });
     
-        const data = await response.json();
-    
         if (!response.ok) return;
+    
+        const data = await response.json();
     
         soldeDisplay.textContent = data.solde + " DA";
         currentSoldeEl.textContent = data.solde + " DA";
-    
-        if (data.subscription_type) {
-            console.log("Abonnement:", data.subscription_type);
-            console.log("Minutes restantes:", data.subscription_minutes_left);
-        }
     }
     
-    /* ================= LOGIN ================= */
+    /* ================= SOLDE ================= */
     
-    authForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const email = document.getElementById("authEmail").value;
-    const password = document.getElementById("authPassword").value;
-
-    try {
-        const response = await fetch(API + "/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            alert(data.error);
-            return;
-        }
-
-        // 🔥 IMPORTANT
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        loginModal.style.display = "none";
-        loadUser();
-        refreshSolde();
-
-        alert("Connexion réussie ✅");
-
-    } catch (error) {
-        alert("Erreur serveur");
-    }
-});
-    
-    /* ================= DEPOSIT ================= */
-    
-    soldeBtn.addEventListener("click", () => {
-        soldeModal.style.display = "block";
-    });
-    
-    closeSoldeModal.addEventListener("click", () => {
-        soldeModal.style.display = "none";
-    });
+    soldeBtn.onclick = () => soldeModal.style.display = "block";
+    closeSoldeModal.onclick = () => soldeModal.style.display = "none";
     
     depositForm.addEventListener("submit", async function (e) {
     
@@ -1170,6 +1147,11 @@ logoutBtn.addEventListener("click", function () {
         e.preventDefault();
     
         const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Connectez-vous d'abord");
+            return;
+        }
+    
         const response = await fetch(API + "/reserve", {
             method: "POST",
             headers: {
@@ -1182,12 +1164,48 @@ logoutBtn.addEventListener("click", function () {
         const data = await response.json();
     
         if (response.ok) {
-            alert("Code: " + data.code);
+            reservationCode.style.display = "block";
+            codeDisplay.textContent = data.code;
         } else {
             alert(data.error);
         }
     });
     
+    /* ================= UNLOCK ================= */
+    
+    unlockBtn.onclick = () => unlockModal.style.display = "block";
+    closeUnlockModal.onclick = () => unlockModal.style.display = "none";
+    
+    unlockForm.addEventListener("submit", async function (e) {
+    
+        e.preventDefault();
+    
+        const token = localStorage.getItem("token");
+        const code = document.getElementById("unlockCode").value;
+    
+        const response = await fetch(API + "/unlock", {
+            method: "POST",
+            headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ code })
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+    
+            localStorage.setItem("rideStartTime", Date.now());
+            startTimer();
+    
+            unlockModal.style.display = "none";
+            alert("Vélo déverrouillé 🚴");
+    
+        } else {
+            alert(data.error);
+        }
+    });
     
     /* ================= TIMER ================= */
     
@@ -1202,7 +1220,6 @@ logoutBtn.addEventListener("click", function () {
             if (!start) return;
     
             const elapsed = Date.now() - parseInt(start);
-    
             const min = Math.floor(elapsed / 60000);
             const sec = Math.floor((elapsed % 60000) / 1000);
     
@@ -1236,7 +1253,6 @@ logoutBtn.addEventListener("click", function () {
             endRideBtn.style.display = "none";
     
             refreshProfile();
-    
             alert("Durée: " + data.duration + " min");
     
         } else {
@@ -1246,12 +1262,8 @@ logoutBtn.addEventListener("click", function () {
     
     /* ================= INIT ================= */
     
+    updateUI();
     refreshProfile();
-        const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-                const parsed = JSON.parse(storedUser);
-                loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
-            }
     
     if (localStorage.getItem("rideStartTime")) {
         startTimer();
