@@ -585,7 +585,28 @@
                     <li><a href="#how">Comment ça marche</a></li>
                     <li><a href="#booking">Réserver</a></li>
                 </ul>
-                <button class="btn-outline" id="loginBtn" type="button">Se connecter</button>
+                <div style="position: relative; display: inline-block;">
+    <button class="btn-outline" id="loginBtn" type="button">
+        Se connecter
+    </button>
+
+      <div id="dropdownMenu" style="
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 45px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                min-width: 180px;
+                overflow: hidden;
+                z-index: 3000;
+            ">
+                <div class="dropdown-item" id="profileBtn">👤 Mon profil</div>
+                <div class="dropdown-item" id="menuSoldeBtn">💰 Mon solde</div>
+                <div class="dropdown-item" id="logoutBtn">🚪 Se déconnecter</div>
+            </div>
+        </div>
                 <button class="btn-outline" id="soldeBtn" type="button" style="background: white; color: var(--primary); border: 2px solid var(--primary);">💰 <span id="soldeDisplay">0 DA</span></button>
                 <button class="btn-outline" id="unlockBtn" type="button">🔓 Déverrouiller</button>
                 <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
@@ -611,25 +632,7 @@
         </div>
     </div>
 
- <div id="userMenu" style="position: relative; display: inline-block;">
-    <div id="dropdownMenu" style="
-        display: none;
-        position: absolute;
-        right: 0;
-        top: 45px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        min-width: 180px;
-        overflow: hidden;
-        z-index: 3000;
-    ">
-        <div class="dropdown-item" id="profileBtn">👤 Mon profil</div>
-        <div class="dropdown-item" id="menuSoldeBtn">💰 Mon solde</div>
-        <div class="dropdown-item" id="logoutBtn">🚪 Se déconnecter</div>
-    </div>
-</div>
-    <!-- Modal Unlock -->
+     <!-- Modal Unlock -->
     <div id="unlockModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeUnlockModal">&times;</span>
