@@ -971,314 +971,313 @@
     <script>
     document.addEventListener("DOMContentLoaded", function () {
     
-    const API = "https://wheely-dz-server.onrender.com";
+        const API = "https://wheely-dz-server.onrender.com";
     
-    let currentSolde = 0;
-    let isLoginMode = true;
+        let currentSolde = 0;
+        let isLoginMode = true;
     
-    // ================= ELEMENTS =================
-    const loginBtn = document.getElementById("loginBtn");
-    const loginModal = document.getElementById("loginModal");
-    const closeModal = document.getElementById("closeModal");
+        // ================= ELEMENTS =================
+        const loginBtn = document.getElementById("loginBtn");
+        const loginModal = document.getElementById("loginModal");
+        const closeModal = document.getElementById("closeModal");
     
-    const authForm = document.getElementById("authForm");
-    const toggleAuth = document.getElementById("toggleAuth");
-    const nameField = document.getElementById("nameField");
-    const authButtonText = document.getElementById("authButtonText");
+        const authForm = document.getElementById("authForm");
+        const toggleAuth = document.getElementById("toggleAuth");
+        const nameField = document.getElementById("nameField");
+        const authButtonText = document.getElementById("authButtonText");
     
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const menuSoldeBtn = document.getElementById("menuSoldeBtn");
-    const profileBtn = document.getElementById("profileBtn");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const menuSoldeBtn = document.getElementById("menuSoldeBtn");
+        const profileBtn = document.getElementById("profileBtn");
     
-    const soldeModal = document.getElementById("soldeModal");
-    const soldeBtn = document.getElementById("soldeBtn");
-    const closeSoldeModal = document.getElementById("closeSoldeModal");
-    const depositForm = document.getElementById("depositForm");
+        const soldeModal = document.getElementById("soldeModal");
+        const soldeBtn = document.getElementById("soldeBtn");
+        const closeSoldeModal = document.getElementById("closeSoldeModal");
+        const depositForm = document.getElementById("depositForm");
     
-    const reservationForm = document.getElementById("reservationForm");
+        const reservationForm = document.getElementById("reservationForm");
     
-    const unlockForm = document.getElementById("unlockForm");
-    const unlockBtn = document.getElementById("unlockBtn");
-    const unlockModal = document.getElementById("unlockModal");
-    const closeUnlockModal = document.getElementById("closeUnlockModal");
-
+        const unlockForm = document.getElementById("unlockForm");
+        const unlockBtn = document.getElementById("unlockBtn");
+        const unlockModal = document.getElementById("unlockModal");
+        const closeUnlockModal = document.getElementById("closeUnlockModal");
+    
         let rideInterval = null;
         let rideStartTime = null;
     
-    // ================= USER =================
-    function loadUser() {
-        const user = localStorage.getItem("user");
+        // ================= USER =================
+        function loadUser() {
+            const user = localStorage.getItem("user");
     
-        if (user) {
-            const parsed = JSON.parse(user);
-            loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
-        } else {
-            loginBtn.textContent = "Se connecter";
+            if (user) {
+                const parsed = JSON.parse(user);
+                loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
+            } else {
+                loginBtn.textContent = "Se connecter";
+            }
         }
-    }
     
-    function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        dropdownMenu.style.display = "none";
-        loadUser();
-    }
-    
-    logoutBtn.addEventListener("click", logout);
-    
-    // ================= LOGIN =================
-    loginBtn.addEventListener("click", function () {
-        const user = localStorage.getItem("user");
-    
-        if (!user) {
-            loginModal.style.display = "block";
-        } else {
-            dropdownMenu.style.display =
-                dropdownMenu.style.display === "block" ? "none" : "block";
-        }
-    });
-    
-    closeModal.addEventListener("click", () => loginModal.style.display = "none");
-    
-    toggleAuth.addEventListener("click", function (e) {
-        e.preventDefault();
-        isLoginMode = !isLoginMode;
-    
-        nameField.style.display = isLoginMode ? "none" : "block";
-        authButtonText.textContent = isLoginMode ? "Se connecter" : "Créer un compte";
-        toggleAuth.textContent = isLoginMode ? "Créer un compte" : "Déjà un compte ?";
-    });
-    
-    authForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-    
-        const email = document.getElementById("authEmail").value;
-        const password = document.getElementById("authPassword").value;
-        const nom = document.getElementById("authName").value;
-    
-        const url = isLoginMode ? "/login" : "/register";
-        const body = isLoginMode
-            ? { email, password }
-            : { nom, email, password };
-    
-        const response = await fetch(API + url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
-    
-        const data = await response.json();
-    
-        if (response.ok) {
-            if (data.token) localStorage.setItem("token", data.token);
-            if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
-    
-            loginModal.style.display = "none";
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            dropdownMenu.style.display = "none";
             loadUser();
-            refreshSolde();
-            alert("Connexion réussie ✅");
-        } else {
-            alert(data.error);
         }
-    });
     
-    // ================= SOLDE =================
-    function updateSoldeDisplay() {
-        document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
-        document.getElementById("currentSolde").textContent = currentSolde + " DA";
-    }
+        logoutBtn.addEventListener("click", logout);
     
-    async function refreshSolde() {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+        // ================= LOGIN =================
+        loginBtn.addEventListener("click", function () {
+            const user = localStorage.getItem("user");
     
-        const response = await fetch(API + "/profile", {
-            headers: { Authorization: "Bearer " + token }
+            if (!user) {
+                loginModal.style.display = "block";
+            } else {
+                dropdownMenu.style.display =
+                    dropdownMenu.style.display === "block" ? "none" : "block";
+            }
         });
     
-        const data = await response.json();
+        closeModal.addEventListener("click", () => loginModal.style.display = "none");
     
-        if (response.ok) {
-
-    alert(data.message);
-    unlockModal.style.display = "none";
-    unlockForm.reset();
-
-    // Démarrer la location
-    rideStartTime = Date.now();
-
-    const rideStatus = document.getElementById("rideStatus");
-    const rideTimer = document.getElementById("rideTimer");
-
-    rideStatus.style.display = "inline-block";
-
-    rideInterval = setInterval(() => {
-        const elapsed = Date.now() - rideStartTime;
-
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-
-        rideTimer.textContent =
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(seconds).padStart(2, "0");
-    }, 1000);
-}
+        toggleAuth.addEventListener("click", function (e) {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
     
-    soldeBtn.addEventListener("click", () => soldeModal.style.display = "block");
-    closeSoldeModal.addEventListener("click", () => soldeModal.style.display = "none");
-    
-    depositForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-    
-        const token = localStorage.getItem("token");
-        const amount = parseInt(document.getElementById("depositAmount").value);
-    
-        const response = await fetch(API + "/deposit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-            },
-            body: JSON.stringify({ amount })
+            nameField.style.display = isLoginMode ? "none" : "block";
+            authButtonText.textContent = isLoginMode ? "Se connecter" : "Créer un compte";
+            toggleAuth.textContent = isLoginMode ? "Créer un compte" : "Déjà un compte ?";
         });
     
-        const data = await response.json();
+        authForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
     
-        if (response.ok) {
-            currentSolde = data.newSolde;
-            updateSoldeDisplay();
-            soldeModal.style.display = "none";
-            depositForm.reset();
-            alert(data.message);
-        } else {
-            alert(data.error);
-        }
-    });
+            const email = document.getElementById("authEmail").value;
+            const password = document.getElementById("authPassword").value;
+            const nom = document.getElementById("authName").value;
     
-    // ================= RESERVATION =================
-    reservationForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
+            const url = isLoginMode ? "/login" : "/register";
+            const body = isLoginMode
+                ? { email, password }
+                : { nom, email, password };
     
-        const token = localStorage.getItem("token");
-        const montant = parseInt(document.getElementById("duration").value);
+            const response = await fetch(API + url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
     
-        const response = await fetch(API + "/reserve", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-            },
-            body: JSON.stringify({ montant })
+            const data = await response.json();
+    
+            if (response.ok) {
+                if (data.token) localStorage.setItem("token", data.token);
+                if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+    
+                loginModal.style.display = "none";
+                loadUser();
+                refreshSolde();
+                alert("Connexion réussie ✅");
+            } else {
+                alert(data.error);
+            }
         });
     
-        const data = await response.json();
-    
-        if (response.ok) {
-            document.getElementById("codeDisplay").textContent = data.code;
-            document.getElementById("reservationCode").style.display = "block";
-            await refreshSolde();
-            alert("Réservation confirmée ✅");
-        } else {
-            alert(data.error);
-        }
-    });
-    
-    // ================= UNLOCK =================
-    unlockBtn.addEventListener("click", () => unlockModal.style.display = "block");
-    closeUnlockModal.addEventListener("click", () => unlockModal.style.display = "none");
-    
-    unlockForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-    
-        const token = localStorage.getItem("token");
-        const code = document.getElementById("unlockCode").value;
-    
-        const response = await fetch(API + "/unlock", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-            },
-            body: JSON.stringify({ code })
-        });
-    
-        const data = await response.json();
-    
-        if (response.ok) {
-            alert(data.message);
-            unlockModal.style.display = "none";
-            unlockForm.reset();
-        } else {
-            alert(data.error);
-        }
-    });
-    
-    // ================= HISTORY =================
-    const historyModal = document.getElementById("historyModal");
-    const closeHistoryModal = document.getElementById("closeHistoryModal");
-    const historyContent = document.getElementById("historyContent");
-    
-    profileBtn.addEventListener("click", async function () {
-        const token = localStorage.getItem("token");
-    
-        if (!token) {
-            alert("Veuillez vous connecter");
-            return;
+        // ================= SOLDE =================
+        function updateSoldeDisplay() {
+            document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
+            document.getElementById("currentSolde").textContent = currentSolde + " DA";
         }
     
-        historyModal.style.display = "block";
+        async function refreshSolde() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
     
-        try {
-            const response = await fetch(API + "/my-reservations", {
+            const response = await fetch(API + "/profile", {
                 headers: { Authorization: "Bearer " + token }
             });
     
             const data = await response.json();
     
             if (response.ok) {
+                currentSolde = data.solde;
+                updateSoldeDisplay();
+            }
+        }
     
-                if (data.length === 0) {
-                    historyContent.innerHTML = "<p>Aucune réservation trouvée.</p>";
-                    return;
-                }
+        soldeBtn.addEventListener("click", () => soldeModal.style.display = "block");
+        closeSoldeModal.addEventListener("click", () => soldeModal.style.display = "none");
     
-                historyContent.innerHTML = data.map(res => `
-                    <div style="padding:10px; border-bottom:1px solid #eee;">
-                        <strong>Code:</strong> ${res.code} <br>
-                        <strong>Montant:</strong> ${res.montant} DA <br>
-                        <strong>Statut:</strong> 
-                            <span style="color:${res.used ? 'green' : 'orange'}; font-weight:bold;">
-                                ${res.used ? "Utilisé ✅" : "Non utilisé ⏳"}
-                            </span>
-                        <br>
-                        <strong>Date:</strong> ${new Date(res.created_at).toLocaleString()}
-                    </div>
-                `).join("");
+        depositForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
     
+            const token = localStorage.getItem("token");
+            const amount = parseInt(document.getElementById("depositAmount").value);
+    
+            const response = await fetch(API + "/deposit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token
+                },
+                body: JSON.stringify({ amount })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                currentSolde = data.newSolde;
+                updateSoldeDisplay();
+                soldeModal.style.display = "none";
+                depositForm.reset();
+                alert(data.message);
             } else {
-                historyContent.innerHTML = "<p>Erreur lors du chargement</p>";
+                alert(data.error);
+            }
+        });
+    
+        // ================= RESERVATION =================
+        reservationForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+    
+            const token = localStorage.getItem("token");
+            const montant = parseInt(document.getElementById("duration").value);
+    
+            const response = await fetch(API + "/reserve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token
+                },
+                body: JSON.stringify({ montant })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                document.getElementById("codeDisplay").textContent = data.code;
+                document.getElementById("reservationCode").style.display = "block";
+                await refreshSolde();
+                alert("Réservation confirmée ✅");
+            } else {
+                alert(data.error);
+            }
+        });
+    
+        // ================= UNLOCK =================
+        unlockBtn.addEventListener("click", () => unlockModal.style.display = "block");
+        closeUnlockModal.addEventListener("click", () => unlockModal.style.display = "none");
+    
+        unlockForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+    
+            const token = localStorage.getItem("token");
+            const code = document.getElementById("unlockCode").value;
+    
+            const response = await fetch(API + "/unlock", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token
+                },
+                body: JSON.stringify({ code })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                alert(data.message);
+                unlockModal.style.display = "none";
+                unlockForm.reset();
+    
+                // 🚴 Démarrer la location
+                rideStartTime = Date.now();
+    
+                const rideStatus = document.getElementById("rideStatus");
+                const rideTimer = document.getElementById("rideTimer");
+    
+                rideStatus.style.display = "inline-block";
+    
+                rideInterval = setInterval(() => {
+                    const elapsed = Date.now() - rideStartTime;
+    
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+    
+                    rideTimer.textContent =
+                        String(minutes).padStart(2, "0") +
+                        ":" +
+                        String(seconds).padStart(2, "0");
+                }, 1000);
+            } else {
+                alert(data.error);
+            }
+        });
+    
+        // ================= HISTORY =================
+        const historyModal = document.getElementById("historyModal");
+        const closeHistoryModal = document.getElementById("closeHistoryModal");
+        const historyContent = document.getElementById("historyContent");
+    
+        profileBtn.addEventListener("click", async function () {
+            const token = localStorage.getItem("token");
+    
+            if (!token) {
+                alert("Veuillez vous connecter");
+                return;
             }
     
-        } catch (error) {
-            historyContent.innerHTML = "<p>Erreur serveur</p>";
-        }
-    });
+            historyModal.style.display = "block";
     
-    closeHistoryModal.addEventListener("click", function () {
-        historyModal.style.display = "none";
-    });
+            try {
+                const response = await fetch(API + "/my-reservations", {
+                    headers: { Authorization: "Bearer " + token }
+                });
     
-    window.addEventListener("click", function (e) {
-        if (e.target === historyModal) {
+                const data = await response.json();
+    
+                if (response.ok) {
+    
+                    if (data.length === 0) {
+                        historyContent.innerHTML = "<p>Aucune réservation trouvée.</p>";
+                        return;
+                    }
+    
+                    historyContent.innerHTML = data.map(res => `
+                        <div style="padding:10px; border-bottom:1px solid #eee;">
+                            <strong>Code:</strong> ${res.code} <br>
+                            <strong>Montant:</strong> ${res.montant} DA <br>
+                            <strong>Statut:</strong> 
+                                <span style="color:${res.used ? 'green' : 'orange'}; font-weight:bold;">
+                                    ${res.used ? "Utilisé ✅" : "Non utilisé ⏳"}
+                                </span>
+                            <br>
+                            <strong>Date:</strong> ${new Date(res.created_at).toLocaleString()}
+                        </div>
+                    `).join("");
+    
+                } else {
+                    historyContent.innerHTML = "<p>Erreur lors du chargement</p>";
+                }
+    
+            } catch (error) {
+                historyContent.innerHTML = "<p>Erreur serveur</p>";
+            }
+        });
+    
+        closeHistoryModal.addEventListener("click", function () {
             historyModal.style.display = "none";
-        }
-    });
+        });
     
-    // ================= INIT =================
-    loadUser();
-    refreshSolde();
+        window.addEventListener("click", function (e) {
+            if (e.target === historyModal) {
+                historyModal.style.display = "none";
+            }
+        });
+    
+        // ================= INIT =================
+        loadUser();
+        refreshSolde();
     
     });
     </script>
