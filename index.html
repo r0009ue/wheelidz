@@ -1181,6 +1181,56 @@
                 alert("Erreur serveur");
             }
         });
+        // ================= UNLOCK =================
+        
+        const unlockForm = document.getElementById("unlockForm");
+        const unlockModal = document.getElementById("unlockModal");
+        const unlockBtn = document.getElementById("unlockBtn");
+        const closeUnlockModal = document.getElementById("closeUnlockModal");
+        
+        unlockBtn.addEventListener("click", () => {
+            unlockModal.style.display = "block";
+        });
+        
+        closeUnlockModal.addEventListener("click", () => {
+            unlockModal.style.display = "none";
+        });
+        
+        unlockForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+        
+            const token = localStorage.getItem("token");
+            const code = document.getElementById("unlockCode").value;
+        
+            if (!token) {
+                alert("Veuillez vous connecter");
+                return;
+            }
+        
+            try {
+                const response = await fetch(API + "/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({ code })
+                });
+        
+                const data = await response.json();
+        
+                if (response.ok) {
+                    alert("🚴 Vélo déverrouillé !");
+                    unlockModal.style.display = "none";
+                    unlockForm.reset();
+                } else {
+                    alert(data.error);
+                }
+        
+            } catch {
+                alert("Erreur serveur");
+            }
+        });
     
         // ================= INIT =================
     
