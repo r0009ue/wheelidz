@@ -1171,6 +1171,39 @@
                 }
             });
         }
+        loginBtn.addEventListener("click", function () {
+            const user = localStorage.getItem("user");
+        
+            if (!user) {
+                loginModal.style.display = "block";
+            } else {
+                dropdownMenu.style.display =
+                    dropdownMenu.style.display === "block" ? "none" : "block";
+            }
+        });
+        
+        closeModal.addEventListener("click", function () {
+            loginModal.style.display = "none";
+        });
+        soldeBtn.addEventListener("click", function () {
+        soldeModal.style.display = "block";
+    });
+    
+    closeSoldeModal.addEventListener("click", function () {
+        soldeModal.style.display = "none";
+    });
+           unlockBtn.addEventListener("click", function () {
+        unlockModal.style.display = "block";
+    });
+    
+    closeUnlockModal.addEventListener("click", function () {
+        unlockModal.style.display = "none";
+    }); 
+            window.addEventListener("click", function (e) {
+        if (e.target === loginModal) loginModal.style.display = "none";
+        if (e.target === soldeModal) soldeModal.style.display = "none";
+        if (e.target === unlockModal) unlockModal.style.display = "none";
+    });
     
         // ================= INIT =================
         loadUser();
