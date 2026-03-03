@@ -613,6 +613,12 @@
                     🚴 Location en cours :
                     <span id="rideTimer">00:00</span>
                 </div>
+                
+                <button id="endRideBtn"
+                        class="btn-outline"
+                        style="display:none; margin-left:10px;">
+                    🛑 Terminer
+                </button>
                 <a href="#booking" class="btn btn-primary">Réserver maintenant</a>
             </nav>
         </div>
@@ -974,7 +980,6 @@
         const API = "https://wheely-dz-server.onrender.com";
     
         let currentSolde = 0;
-        let isLoginMode = true;
         let rideInterval = null;
     
         // ================= ELEMENTS =================
@@ -989,7 +994,6 @@
     
         const dropdownMenu = document.getElementById("dropdownMenu");
         const logoutBtn = document.getElementById("logoutBtn");
-        const profileBtn = document.getElementById("profileBtn");
     
         const soldeModal = document.getElementById("soldeModal");
         const soldeBtn = document.getElementById("soldeBtn");
@@ -1005,12 +1009,9 @@
     
         const rideStatus = document.getElementById("rideStatus");
         const rideTimer = document.getElementById("rideTimer");
-    
-        // 🔴 Crée ce bouton sous ton timer dans le HTML si pas encore fait :
-        // <button id="endRideBtn" class="btn-outline" style="display:none;">🛑 Terminer</button>
         const endRideBtn = document.getElementById("endRideBtn");
     
-        // ================= TIMER FUNCTION =================
+        // ================= TIMER =================
         function startRideTimer() {
     
             rideStatus.style.display = "inline-block";
@@ -1046,49 +1047,20 @@
     
         function logout() {
             localStorage.clear();
-            dropdownMenu.style.display = "none";
             rideStatus.style.display = "none";
             endRideBtn.style.display = "none";
             clearInterval(rideInterval);
             loadUser();
         }
     
-        logoutBtn.addEventListener("click", logout);
-    
-        // ================= AUTH =================
-        authForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-    
-            const email = authEmail.value;
-            const password = authPassword.value;
-            const nom = authName.value;
-    
-            const url = isLoginMode ? "/login" : "/register";
-            const body = isLoginMode ? { email, password } : { nom, email, password };
-    
-            const response = await fetch(API + url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
-                loginModal.style.display = "none";
-                loadUser();
-                refreshSolde();
-            } else {
-                alert(data.error);
-            }
-        });
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", logout);
+        }
     
         // ================= SOLDE =================
         function updateSoldeDisplay() {
-            soldeDisplay.textContent = currentSolde + " DA";
-            currentSoldeEl.textContent = currentSolde + " DA";
+            document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
+            document.getElementById("currentSolde").textContent = currentSolde + " DA";
         }
     
         async function refreshSolde() {
@@ -1100,6 +1072,7 @@
             });
     
             const data = await response.json();
+    
             if (response.ok) {
                 currentSolde = data.solde;
                 updateSoldeDisplay();
@@ -1111,7 +1084,9 @@
             e.preventDefault();
     
             const token = localStorage.getItem("token");
-            const montant = parseInt(duration.value);
+            if (!token) return alert("Connecte-toi d'abord");
+    
+            const montant = parseInt(document.getElementById("duration").value);
     
             const response = await fetch(API + "/reserve", {
                 method: "POST",
@@ -1125,8 +1100,8 @@
             const data = await response.json();
     
             if (response.ok) {
-                codeDisplay.textContent = data.code;
-                reservationCode.style.display = "block";
+                document.getElementById("codeDisplay").textContent = data.code;
+                document.getElementById("reservationCode").style.display = "block";
                 refreshSolde();
             } else {
                 alert(data.error);
@@ -1138,7 +1113,9 @@
             e.preventDefault();
     
             const token = localStorage.getItem("token");
-            const code = unlockCode.value;
+            if (!token) return alert("Connecte-toi d'abord");
+    
+            const code = document.getElementById("unlockCode").value;
     
             const response = await fetch(API + "/unlock", {
                 method: "POST",
@@ -1153,7 +1130,6 @@
     
             if (response.ok) {
     
-                // Sauvegarde heure locale
                 const now = Date.now();
                 localStorage.setItem("rideStartTime", now);
     
@@ -1168,31 +1144,33 @@
         });
     
         // ================= END RIDE =================
-        endRideBtn.addEventListener("click", async function () {
+        if (endRideBtn) {
+            endRideBtn.addEventListener("click", async function () {
     
-            const token = localStorage.getItem("token");
+                const token = localStorage.getItem("token");
     
-            const response = await fetch(API + "/end-ride", {
-                method: "POST",
-                headers: { Authorization: "Bearer " + token }
+                const response = await fetch(API + "/end-ride", {
+                    method: "POST",
+                    headers: { Authorization: "Bearer " + token }
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+    
+                    clearInterval(rideInterval);
+                    localStorage.removeItem("rideStartTime");
+    
+                    rideStatus.style.display = "none";
+                    endRideBtn.style.display = "none";
+    
+                    alert("Durée réelle : " + data.duration + " minutes 🚴");
+    
+                } else {
+                    alert(data.error);
+                }
             });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-    
-                clearInterval(rideInterval);
-                localStorage.removeItem("rideStartTime");
-    
-                rideStatus.style.display = "none";
-                endRideBtn.style.display = "none";
-    
-                alert("Durée réelle : " + data.duration + " minutes 🚴");
-    
-            } else {
-                alert(data.error);
-            }
-        });
+        }
     
         // ================= INIT =================
         loadUser();
