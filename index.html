@@ -1208,22 +1208,27 @@
             });
     
             const data = await response.json();
-            console.log(data);
     
             if (response.ok) {
+    
                 if (data.length === 0) {
-                    historyContent.innerHTML = data.map(res => `
-                        <div style="padding:10px; border-bottom:1px solid #eee;">
-                            <strong>Code:</strong> ${res.code} <br>
-                            <strong>Montant:</strong> ${res.montant} DA <br>
-                            <strong>Statut:</strong> 
-                                <span style="color:${res.used ? 'green' : 'orange'}; font-weight:bold;">
-                                    ${res.used ? "Utilisé ✅" : "Non utilisé ⏳"}
-                                </span>
-                            <br>
-                            <strong>Date:</strong> ${new Date(res.created_at).toLocaleString()}
-                        </div>
-                    `).join("");
+                    historyContent.innerHTML = "<p>Aucune réservation trouvée.</p>";
+                    return;
+                }
+    
+                historyContent.innerHTML = data.map(res => `
+                    <div style="padding:10px; border-bottom:1px solid #eee;">
+                        <strong>Code:</strong> ${res.code} <br>
+                        <strong>Montant:</strong> ${res.montant} DA <br>
+                        <strong>Statut:</strong> 
+                            <span style="color:${res.used ? 'green' : 'orange'}; font-weight:bold;">
+                                ${res.used ? "Utilisé ✅" : "Non utilisé ⏳"}
+                            </span>
+                        <br>
+                        <strong>Date:</strong> ${new Date(res.created_at).toLocaleString()}
+                    </div>
+                `).join("");
+    
             } else {
                 historyContent.innerHTML = "<p>Erreur lors du chargement</p>";
             }
