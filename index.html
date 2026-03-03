@@ -1021,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function() {
     soldeBtn.addEventListener('click', () => soldeModal.style.display = 'block');
     closeSoldeModal.addEventListener('click', () => soldeModal.style.display = 'none');
 
-    document.getElementById('depositForm').addEventListener('submit', async function(e) {
+   document.getElementById('depositForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const amount = parseInt(document.getElementById('depositAmount').value);
@@ -1045,9 +1045,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = await response.json();
 
         if (response.ok) {
-            alert("Dépôt réussi ✅");
+
+            // 🔥 IMPORTANT
+            await fetchUserProfile();   // recharge le vrai solde
+
             soldeModal.style.display = "none";
             this.reset();
+            alert("Dépôt réussi ✅");
+
         } else {
             alert(data.error);
         }
