@@ -1120,11 +1120,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (user) {
             const parsedUser = JSON.parse(user);
             loginBtn.textContent = "Bonjour " + parsedUser.nom + " 👋";
-
-            loginBtn.onclick = function() {
-                dropdownMenu.style.display =
-                    dropdownMenu.style.display === "block" ? "none" : "block";
-            };
         }
     }
 
@@ -1158,8 +1153,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadUserFromStorage();
     fetchUserProfile();
+    // Ouvrir le modal si pas connecté
+loginBtn.addEventListener("click", function () {
 
+    const user = localStorage.getItem("user");
+
+    if (!user) {
+        loginModal.style.display = "block";
+        return;
+    }
+
+    // Si connecté → toggle menu
+    dropdownMenu.style.display =
+        dropdownMenu.style.display === "block" ? "none" : "block";
 });
+
    </script>
  </body>
 </html>
