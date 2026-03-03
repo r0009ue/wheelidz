@@ -957,55 +957,236 @@
     </footer>
 
     <script>
-    reservationForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
+    document.addEventListener("DOMContentLoaded", function () {
     
-        const token = localStorage.getItem("token");
+        const API = "https://wheely-dz-server.onrender.com";
     
-        if (!token) {
-            alert("Veuillez vous connecter");
-            return;
-        }
+        let currentSolde = 0;
+        let isLoginMode = true;
     
-        // 🔥 IMPORTANT
-        const montant = parseInt(document.getElementById("duration").value);
+        // ================= ELEMENTS =================
+        const loginBtn = document.getElementById("loginBtn");
+        const loginModal = document.getElementById("loginModal");
+        const closeModal = document.getElementById("closeModal");
     
-        if (!montant || montant <= 0) {
-            alert("Choisissez une durée valide");
-            return;
-        }
+        const authForm = document.getElementById("authForm");
+        const toggleAuth = document.getElementById("toggleAuth");
+        const nameField = document.getElementById("nameField");
+        const authButtonText = document.getElementById("authButtonText");
     
-        try {
-            const response = await fetch("https://wheely-dz-server.onrender.com/reserve", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token
-                },
-                body: JSON.stringify({ montant }) // 🔥 ON ENVOIE montant
-            });
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const menuSoldeBtn = document.getElementById("menuSoldeBtn");
     
-            const data = await response.json();
+        const soldeModal = document.getElementById("soldeModal");
+        const soldeBtn = document.getElementById("soldeBtn");
+        const closeSoldeModal = document.getElementById("closeSoldeModal");
+        const depositForm = document.getElementById("depositForm");
     
-            if (response.ok) {
+        const reservationForm = document.getElementById("reservationForm");
     
-                // Mise à jour du solde côté front
-                currentSolde -= montant;
-                updateSoldeDisplay();
+        // ================= USER =================
     
-                // Afficher le code
-                document.getElementById("codeDisplay").textContent = data.code;
-                document.getElementById("reservationCode").style.display = "block";
+        function loadUser() {
+            const user = localStorage.getItem("user");
     
-                alert("Réservation confirmée ✅");
-    
+            if (user) {
+                const parsed = JSON.parse(user);
+                loginBtn.textContent = "Bonjour " + parsed.nom + " 👋";
             } else {
-                alert(data.error);
+                loginBtn.textContent = "Se connecter";
+            }
+        }
+    
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            dropdownMenu.style.display = "none";
+            loadUser();
+        }
+    
+        logoutBtn.addEventListener("click", logout);
+    
+        // ================= LOGIN BUTTON =================
+    
+        loginBtn.addEventListener("click", function () {
+            const user = localStorage.getItem("user");
+    
+            if (!user) {
+                loginModal.style.display = "block";
+            } else {
+                dropdownMenu.style.display =
+                    dropdownMenu.style.display === "block" ? "none" : "block";
+            }
+        });
+    
+        closeModal.addEventListener("click", () => loginModal.style.display = "none");
+    
+        // ================= TOGGLE LOGIN/REGISTER =================
+    
+        toggleAuth.addEventListener("click", function (e) {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+    
+            nameField.style.display = isLoginMode ? "none" : "block";
+            authButtonText.textContent = isLoginMode ? "Se connecter" : "Créer un compte";
+            toggleAuth.textContent = isLoginMode ? "Créer un compte" : "Déjà un compte ?";
+        });
+    
+        // ================= AUTH =================
+    
+        authForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+    
+            const email = document.getElementById("authEmail").value;
+            const password = document.getElementById("authPassword").value;
+            const nom = document.getElementById("authName").value;
+    
+            const url = isLoginMode ? "/login" : "/register";
+            const body = isLoginMode
+                ? { email, password }
+                : { nom, email, password };
+    
+            try {
+                const response = await fetch(API + url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    if (data.token) localStorage.setItem("token", data.token);
+                    if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+    
+                    loginModal.style.display = "none";
+                    loadUser();
+                    alert("Connexion réussie ✅");
+                } else {
+                    alert(data.error);
+                }
+    
+            } catch {
+                alert("Erreur serveur");
+            }
+        });
+    
+        // ================= SOLDE =================
+    
+        function updateSoldeDisplay() {
+            document.getElementById("soldeDisplay").textContent = currentSolde + " DA";
+            document.getElementById("currentSolde").textContent = currentSolde + " DA";
+        }
+    
+        async function refreshSolde() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+    
+            try {
+                const response = await fetch(API + "/profile", {
+                    headers: { Authorization: "Bearer " + token }
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    currentSolde = data.solde;
+                    updateSoldeDisplay();
+                }
+            } catch {}
+        }
+    
+        soldeBtn.addEventListener("click", () => soldeModal.style.display = "block");
+        closeSoldeModal.addEventListener("click", () => soldeModal.style.display = "none");
+    
+        depositForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+    
+            const token = localStorage.getItem("token");
+            const amount = parseInt(document.getElementById("depositAmount").value);
+    
+            if (!token) {
+                alert("Veuillez vous connecter");
+                return;
             }
     
-        } catch (error) {
-            alert("Erreur serveur");
-        }
+            try {
+                const response = await fetch(API + "/deposit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token
+                    },
+                    body: JSON.stringify({ amount })
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    await refreshSolde();
+                    soldeModal.style.display = "none";
+                    depositForm.reset();
+                    alert("Dépôt réussi ✅");
+                } else {
+                    alert(data.error);
+                }
+    
+            } catch {
+                alert("Erreur serveur");
+            }
+        });
+    
+        // ================= RESERVATION =================
+    
+        reservationForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+    
+            const token = localStorage.getItem("token");
+            const montant = parseInt(document.getElementById("duration").value);
+    
+            if (!token) {
+                alert("Veuillez vous connecter");
+                return;
+            }
+    
+            if (!montant || montant <= 0) {
+                alert("Choisissez une durée valide");
+                return;
+            }
+    
+            try {
+                const response = await fetch(API + "/reserve", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token
+                    },
+                    body: JSON.stringify({ montant })
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    document.getElementById("codeDisplay").textContent = data.code;
+                    document.getElementById("reservationCode").style.display = "block";
+    
+                    await refreshSolde();
+                    alert("Réservation confirmée ✅");
+                } else {
+                    alert(data.error);
+                }
+    
+            } catch {
+                alert("Erreur serveur");
+            }
+        });
+    
+        // ================= INIT =================
+    
+        loadUser();
+        refreshSolde();
+    
     });
     </script>
  </body>
