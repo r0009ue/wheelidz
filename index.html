@@ -926,264 +926,222 @@
     </footer>
 
     <script>
-        // Solde management
-        let currentSolde = 0;
+document.addEventListener('DOMContentLoaded', function() {
 
-        // Dernier code de réservation généré
-        let lastGeneratedCode = null;
+    // ================= VARIABLES =================
+    let currentSolde = 0;
+    let lastGeneratedCode = null;
+    let isLoginMode = true;
 
-        function updateSoldeDisplay() {
-            document.getElementById('soldeDisplay').textContent = currentSolde + ' DA';
-            document.getElementById('currentSolde').textContent = currentSolde + ' DA';
-        }
+    const loginModal = document.getElementById('loginModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const closeModal = document.getElementById('closeModal');
 
-        // Update price display when duration changes
-        document.getElementById('duration').addEventListener('change', function() {
-            const price = this.value;
-            const priceDisplay = document.getElementById('priceDisplay');
-            const totalPrice = document.getElementById('totalPrice');
-            
-            if (price) {
-                priceDisplay.style.display = 'block';
-                totalPrice.textContent = price + ' DA';
-            } else {
-                priceDisplay.style.display = 'none';
-            }
-        });
+    const soldeModal = document.getElementById('soldeModal');
+    const soldeBtn = document.getElementById('soldeBtn');
+    const closeSoldeModal = document.getElementById('closeSoldeModal');
 
-        // Handle form submission
-        document.getElementById('reservationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const price = parseInt(document.getElementById('duration').value);
-            const alertContainer = document.getElementById('alertContainer');
-            
-            // Check if price is selected
-            if (!price) {
-                alertContainer.innerHTML = '<div class="alert alert-warning">⚠️ Veuillez sélectionner une durée de location</div>';
-                return;
-            }
-            
-            // Check if solde is sufficient
-            if (currentSolde < price) {
-                alertContainer.innerHTML = '<div class="alert alert-warning">⚠️ Solde insuffisant ! Votre solde : ' + currentSolde + ' DA. Prix : ' + price + ' DA. <br><br><button class="btn btn-primary" onclick="document.getElementById(\'soldeModal\').style.display = \'block\'">💰 Recharger mon solde</button></div>';
-                return;
-            }
-            
-            // Deduct from solde
-            currentSolde -= price;
-            updateSoldeDisplay();
-            
-            // Generate random 6-digit code
-            const code = Math.floor(100000 + Math.random() * 900000);
-            lastGeneratedCode = code;
-            
-            // Show success message
-            alertContainer.innerHTML = '<div class="alert alert-success">✅ Paiement réussi ! ' + price + ' DA déduits. Nouveau solde : ' + currentSolde + ' DA</div>';
-            
-            // Show reservation code
-            document.getElementById('codeDisplay').textContent = code;
-            document.getElementById('reservationCode').style.display = 'block';
-            
-            // Scroll to code
-            document.getElementById('reservationCode').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Reset form after 10 seconds
-            setTimeout(() => {
-                if (confirm('Voulez-vous faire une nouvelle réservation ?')) {
-                    document.getElementById('reservationForm').reset();
-                    document.getElementById('reservationCode').style.display = 'none';
-                    document.getElementById('priceDisplay').style.display = 'none';
-                    alertContainer.innerHTML = '';
-                }
-            }, 10000);
-        });
+    const unlockModal = document.getElementById('unlockModal');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const closeUnlockModal = document.getElementById('closeUnlockModal');
 
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
+    const authForm = document.getElementById("authForm");
+    const toggleAuth = document.getElementById("toggleAuth");
+    const nameField = document.getElementById("nameField");
+    const authButtonText = document.getElementById("authButtonText");
 
-        // Modal functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginModal = document.getElementById('loginModal');
-            const loginBtn = document.getElementById('loginBtn');
-            const closeModal = document.getElementById('closeModal');
-            
-            const soldeModal = document.getElementById('soldeModal');
-            const soldeBtn = document.getElementById('soldeBtn');
-            const closeSoldeModal = document.getElementById('closeSoldeModal');
-            
-            const unlockModal = document.getElementById('unlockModal');
-            const unlockBtn = document.getElementById('unlockBtn');
-            const closeUnlockModal = document.getElementById('closeUnlockModal');
+    // ================= SOLDE =================
 
-            // Initialize solde display
-            updateSoldeDisplay();
-
-            // Open solde modal
-            soldeBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                soldeModal.style.display = 'block';
-            });
-
-            // Close solde modal
-            closeSoldeModal.addEventListener('click', function() {
-                soldeModal.style.display = 'none';
-            });
-
-            // Handle deposit
-            document.getElementById('depositForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const amount = parseInt(document.getElementById('depositAmount').value);
-                currentSolde += amount;
-                updateSoldeDisplay();
-                alert('✅ Dépôt réussi ! ' + amount + ' DA ajoutés. Nouveau solde : ' + currentSolde + ' DA');
-                soldeModal.style.display = 'none';
-                document.getElementById('depositForm').reset();
-            });
-
-            // Open login modal
-            loginBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                loginModal.style.display = 'block';
-            });
-
-            // Close login modal
-            closeModal.addEventListener('click', function() {
-                loginModal.style.display = 'none';
-            });
-
-            // Open unlock modal
-            unlockBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                document.getElementById('unlockAlert').innerHTML = '';
-                document.getElementById('unlockForm').reset();
-                unlockModal.style.display = 'block';
-            });
-
-            // Close unlock modal
-            closeUnlockModal.addEventListener('click', function() {
-                unlockModal.style.display = 'none';
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function(e) {
-                if (e.target === loginModal) {
-                    loginModal.style.display = 'none';
-                }
-                if (e.target === soldeModal) {
-                    soldeModal.style.display = 'none';
-                }
-                if (e.target === unlockModal) {
-                    unlockModal.style.display = 'none';
-                }
-            });
-
-            // Handle login form submission
-           let isLoginMode = true;
-
-const authForm = document.getElementById("authForm");
-const toggleAuth = document.getElementById("toggleAuth");
-const nameField = document.getElementById("nameField");
-const authButtonText = document.getElementById("authButtonText");
-
-toggleAuth.addEventListener("click", function(e) {
-    e.preventDefault();
-    isLoginMode = !isLoginMode;
-
-    if (isLoginMode) {
-        nameField.style.display = "none";
-        authButtonText.textContent = "Se connecter";
-        toggleAuth.textContent = "Créer un compte";
-    } else {
-        nameField.style.display = "block";
-        authButtonText.textContent = "Créer un compte";
-        toggleAuth.textContent = "Déjà un compte ?";
+    function updateSoldeDisplay() {
+        document.getElementById('soldeDisplay').textContent = currentSolde + ' DA';
+        document.getElementById('currentSolde').textContent = currentSolde + ' DA';
     }
-});
 
-authForm.addEventListener("submit", async function(e) {
-    e.preventDefault();
+    updateSoldeDisplay();
 
-    const email = document.getElementById("authEmail").value;
-    const password = document.getElementById("authPassword").value;
-    const nom = document.getElementById("authName").value;
+    soldeBtn.addEventListener('click', () => soldeModal.style.display = 'block');
+    closeSoldeModal.addEventListener('click', () => soldeModal.style.display = 'none');
 
-    const url = isLoginMode 
-        ? "https://wheely-dz-server.onrender.com/login"
-        : "https://wheely-dz-server.onrender.com/register";
+    document.getElementById('depositForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const amount = parseInt(document.getElementById('depositAmount').value);
+        currentSolde += amount;
+        updateSoldeDisplay();
+        alert('✅ Dépôt réussi !');
+        soldeModal.style.display = 'none';
+        this.reset();
+    });
 
-    const body = isLoginMode 
-        ? { email, password }
-        : { nom, email, password };
+    // ================= LOGIN / REGISTER =================
 
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
+    toggleAuth.addEventListener("click", function(e) {
+        e.preventDefault();
+        isLoginMode = !isLoginMode;
 
-        const data = await response.json();
-
-        if (response.ok) {
-            localStorage.setItem("token", data.token || "");
-            localStorage.setItem("user", JSON.stringify(data.user));
-
-            alert(isLoginMode ? "Connexion réussie ✅" : "Compte créé ✅");
-
-            document.getElementById("loginModal").style.display = "none";
-
+        if (isLoginMode) {
+            nameField.style.display = "none";
+            authButtonText.textContent = "Se connecter";
+            toggleAuth.textContent = "Créer un compte";
         } else {
-            alert(data.error);
+            nameField.style.display = "block";
+            authButtonText.textContent = "Créer un compte";
+            toggleAuth.textContent = "Déjà un compte ?";
+        }
+    });
+
+    authForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("authEmail").value;
+        const password = document.getElementById("authPassword").value;
+        const nom = document.getElementById("authName").value;
+
+        const url = isLoginMode
+            ? "https://wheely-dz-server.onrender.com/login"
+            : "https://wheely-dz-server.onrender.com/register";
+
+        const body = isLoginMode
+            ? { email, password }
+            : { nom, email, password };
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                }
+
+                if (data.user) {
+                    localStorage.setItem("user", JSON.stringify(data.user));
+                }
+
+                loadUserFromStorage();
+
+                alert(isLoginMode ? "Connexion réussie ✅" : "Compte créé ✅");
+                loginModal.style.display = "none";
+            } else {
+                alert(data.error || "Erreur");
+            }
+
+        } catch (error) {
+            alert("Erreur serveur");
+        }
+    });
+
+    function loadUserFromStorage() {
+        const user = localStorage.getItem("user");
+
+        if (user) {
+            const parsedUser = JSON.parse(user);
+            loginBtn.textContent = "Bonjour " + parsedUser.nom + " 👋";
+            loginBtn.onclick = logoutUser;
+        }
+    }
+
+    function logoutUser() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        loginBtn.textContent = "Se connecter";
+        loginBtn.onclick = () => loginModal.style.display = "block";
+
+        alert("Déconnecté ✅");
+    }
+
+    loadUserFromStorage();
+
+    // ================= MODALS =================
+
+    loginBtn.addEventListener('click', function() {
+        if (!localStorage.getItem("user")) {
+            loginModal.style.display = 'block';
+        }
+    });
+
+    closeModal.addEventListener('click', () => loginModal.style.display = 'none');
+
+    unlockBtn.addEventListener('click', () => {
+        document.getElementById('unlockForm').reset();
+        document.getElementById('unlockAlert').innerHTML = '';
+        unlockModal.style.display = 'block';
+    });
+
+    closeUnlockModal.addEventListener('click', () => unlockModal.style.display = 'none');
+
+    window.addEventListener('click', function(e) {
+        if (e.target === loginModal) loginModal.style.display = 'none';
+        if (e.target === soldeModal) soldeModal.style.display = 'none';
+        if (e.target === unlockModal) unlockModal.style.display = 'none';
+    });
+
+    // ================= RESERVATION =================
+
+    document.getElementById('duration').addEventListener('change', function() {
+        const price = this.value;
+        const priceDisplay = document.getElementById('priceDisplay');
+        const totalPrice = document.getElementById('totalPrice');
+
+        if (price) {
+            priceDisplay.style.display = 'block';
+            totalPrice.textContent = price + ' DA';
+        } else {
+            priceDisplay.style.display = 'none';
+        }
+    });
+
+    document.getElementById('reservationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const price = parseInt(document.getElementById('duration').value);
+        const alertContainer = document.getElementById('alertContainer');
+
+        if (!price) {
+            alertContainer.innerHTML = '<div class="alert alert-warning">Sélectionnez une durée</div>';
+            return;
         }
 
-    } catch (error) {
-        alert("Erreur serveur");
-    }
+        if (currentSolde < price) {
+            alertContainer.innerHTML = '<div class="alert alert-warning">Solde insuffisant</div>';
+            return;
+        }
+
+        currentSolde -= price;
+        updateSoldeDisplay();
+
+        const code = Math.floor(100000 + Math.random() * 900000);
+        lastGeneratedCode = code;
+
+        alertContainer.innerHTML = '<div class="alert alert-success">Paiement réussi</div>';
+        document.getElementById('codeDisplay').textContent = code;
+        document.getElementById('reservationCode').style.display = 'block';
+    });
+
+    document.getElementById('unlockForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const enteredCode = document.getElementById('unlockCode').value.trim();
+        const unlockAlert = document.getElementById('unlockAlert');
+
+        if (!lastGeneratedCode) {
+            unlockAlert.innerHTML = '<div class="alert alert-warning">Aucune réservation trouvée</div>';
+            return;
+        }
+
+        if (enteredCode === String(lastGeneratedCode)) {
+            unlockAlert.innerHTML = '<div class="alert alert-success">Vélo déverrouillé 🚴</div>';
+        } else {
+            unlockAlert.innerHTML = '<div class="alert alert-warning">Code incorrect</div>';
+        }
+    });
+
 });
-
-            // Handle unlock form submission
-            document.getElementById('unlockForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const enteredCode = document.getElementById('unlockCode').value.trim();
-                const unlockAlert = document.getElementById('unlockAlert');
-
-                if (!lastGeneratedCode) {
-                    unlockAlert.innerHTML = '<div class="alert alert-warning">⚠️ Aucun code de réservation trouvé. Veuillez d\'abord réserver un vélo.</div>';
-                    return;
-                }
-
-                if (enteredCode.length !== 6) {
-                    unlockAlert.innerHTML = '<div class="alert alert-warning">⚠️ Le code doit contenir 6 chiffres.</div>';
-                    return;
-                }
-
-                if (enteredCode === String(lastGeneratedCode)) {
-                    unlockAlert.innerHTML = '<div class="alert alert-success">✅ Votre vélo est déverrouillé. Bonne journée ! 🚴</div>';
-                    setTimeout(() => {
-                        unlockModal.style.display = 'none';
-                        document.getElementById('unlockForm').reset();
-                        unlockAlert.innerHTML = '';
-                    }, 3000);
-                } else {
-                    unlockAlert.innerHTML = '<div class="alert alert-warning">❌ Code incorrect. Veuillez vérifier le code affiché lors de votre réservation.</div>';
-                }
-            });
-        });
-    </script>
-</body>
+  </script>
+ </body>
 </html>
