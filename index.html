@@ -1182,33 +1182,22 @@
             }
         });
         // ================= UNLOCK =================
-        
         const unlockForm = document.getElementById("unlockForm");
-        const unlockModal = document.getElementById("unlockModal");
-        const unlockBtn = document.getElementById("unlockBtn");
-        const closeUnlockModal = document.getElementById("closeUnlockModal");
-        
-        unlockBtn.addEventListener("click", () => {
-            unlockModal.style.display = "block";
-        });
-        
-        closeUnlockModal.addEventListener("click", () => {
-            unlockModal.style.display = "none";
-        });
         
         unlockForm.addEventListener("submit", async function (e) {
             e.preventDefault();
         
             const token = localStorage.getItem("token");
-            const code = document.getElementById("unlockCode").value;
         
             if (!token) {
                 alert("Veuillez vous connecter");
                 return;
             }
         
+            const code = document.getElementById("unlockCode").value;
+        
             try {
-                const response = await fetch(API + "/unlock", {
+                const response = await fetch("https://wheely-dz-server.onrender.com/unlock", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -1220,14 +1209,14 @@
                 const data = await response.json();
         
                 if (response.ok) {
-                    alert("🚴 Vélo déverrouillé !");
-                    unlockModal.style.display = "none";
+                    alert("Vélo déverrouillé 🚴");
+                    document.getElementById("unlockModal").style.display = "none";
                     unlockForm.reset();
                 } else {
                     alert(data.error);
                 }
         
-            } catch {
+            } catch (error) {
                 alert("Erreur serveur");
             }
         });
