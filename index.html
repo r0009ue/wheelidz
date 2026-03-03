@@ -990,6 +990,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginModal = document.getElementById('loginModal');
     const loginBtn = document.getElementById('loginBtn');
     const closeModal = document.getElementById('closeModal');
+    // ================= MODAL CONTROL =================
+
+// Fermer modal avec la croix
+closeModal.addEventListener("click", function () {
+    loginModal.style.display = "none";
+});
+
+// Fermer modal si on clique en dehors
+window.addEventListener("click", function (e) {
+
+    // Fermer modal si clique en dehors
+    if (e.target === loginModal) {
+        loginModal.style.display = "none";
+    }
+
+    // Fermer dropdown si clique en dehors
+    if (!loginBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.style.display = "none";
+    }
+});
 
     const soldeModal = document.getElementById('soldeModal');
     const soldeBtn = document.getElementById('soldeBtn');
@@ -1124,14 +1144,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function logoutUser() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-        loginBtn.textContent = "Se connecter";
-        loginBtn.onclick = () => loginModal.style.display = "block";
-
-        dropdownMenu.style.display = "none";
-    }
+    loginBtn.textContent = "Se connecter";
+    dropdownMenu.style.display = "none";
+}
 
     logoutBtn.addEventListener("click", logoutUser);
 
@@ -1143,12 +1161,6 @@ document.addEventListener('DOMContentLoaded', function() {
     profileBtn.addEventListener("click", function() {
         dropdownMenu.style.display = "none";
         alert("Section profil à développer 👤");
-    });
-
-    window.addEventListener("click", function(e) {
-        if (!loginBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.style.display = "none";
-        }
     });
 
     loadUserFromStorage();
