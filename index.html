@@ -1007,6 +1007,63 @@
     const rideStatus = document.getElementById("rideStatus");
     const rideTimer = document.getElementById("rideTimer");
     const endRideBtn = document.getElementById("endRideBtn");
+
+        /* ================= DROPDOWN MENU ================= */
+
+const dropdownMenu = document.getElementById("dropdownMenu");
+const logoutBtn = document.getElementById("logoutBtn");
+const profileBtn = document.getElementById("profileBtn");
+const menuSoldeBtn = document.getElementById("menuSoldeBtn");
+
+/* Ouvrir / Fermer menu quand on clique sur Bonjour */
+loginBtn.addEventListener("click", function () {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        loginModal.style.display = "block";
+        return;
+    }
+
+    dropdownMenu.style.display =
+        dropdownMenu.style.display === "block"
+            ? "none"
+            : "block";
+});
+
+/* Fermer si clique ailleurs */
+window.addEventListener("click", function (e) {
+    if (!e.target.closest("#loginBtn") &&
+        !e.target.closest("#dropdownMenu")) {
+        dropdownMenu.style.display = "none";
+    }
+});
+
+/* Ouvrir profil */
+profileBtn.addEventListener("click", function () {
+    document.getElementById("historyModal").style.display = "block";
+    dropdownMenu.style.display = "none";
+});
+
+/* Ouvrir solde depuis menu */
+menuSoldeBtn.addEventListener("click", function () {
+    soldeModal.style.display = "block";
+    dropdownMenu.style.display = "none";
+});
+
+/* Déconnexion */
+logoutBtn.addEventListener("click", function () {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("rideStartTime");
+
+    loginBtn.textContent = "Se connecter";
+
+    dropdownMenu.style.display = "none";
+
+    alert("Déconnecté ✅");
+});
     
     /* ================= PROFILE ================= */
     
